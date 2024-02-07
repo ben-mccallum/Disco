@@ -1,3 +1,5 @@
+package Tcp;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +15,7 @@ import java.util.List;
 // open another terminal and run:
 // java echoClient localhost 10002
 // run ^ for as many clients as you need
+
 public class MultiEchoServer {
 
     private static List<PrintWriter> clientWriters = new ArrayList<>();
@@ -71,6 +74,13 @@ public class MultiEchoServer {
             ) {
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
+
+                    //checks if the cleint types "exit" and if so closes the connection
+                    if (inputLine.equals("exit")) {
+                        clientSocket.close();
+
+                        break;
+                    }
                     System.out.println("Received from client "+ clientName +" : " + inputLine);
 
                     // Send the message to all connected clients
