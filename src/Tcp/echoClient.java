@@ -27,18 +27,29 @@ public class echoClient implements Runnable {
             BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
-            // reads from the command line and writes to the socket
-            Thread reader = new Thread(new Reader(in, stdIn, out));
-            /*String userInput;
+            // Thread to handle incoming messages
+            new Thread(() -> {
+                try {
+                    String received;
+                    while ((received = in.readLine()) != null) {
+                        System.out.println("Server: " + received);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error reading from server");
+                    e.printStackTrace();
+                }
+            }).start();
+
+            String userInput;
             while ((userInput = stdIn.readLine()) != null) {
                 out.println(userInput);
                 System.out.println("echo: " + in.readLine());
-            }*/
+            }
 
             out.close();
             in.close();
             stdIn.close();
-          //  echoSocket.close();
+            echoSocket.close();
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             e.printStackTrace();

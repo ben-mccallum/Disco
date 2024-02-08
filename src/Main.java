@@ -4,7 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import Tcp.echoClient;
-public class Main implements Runnable {
+public class Main{
     public static void main(String[] args) {
         // read hostname and portnumber from command line
         String hostName = args[0];
@@ -15,10 +15,5 @@ public class Main implements Runnable {
 
         Thread clientThread = new Thread(new echoClient(hostName, portNumber));
         clientThread.start();
-    }
-
-
-    public void run() {
-        // TODO Auto-generated method stub
     }
 }

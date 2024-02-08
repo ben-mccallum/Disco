@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-
 // to run save changes and run in terminal
 // cs into src/Tcp and run:
 // Javac *.java
@@ -52,51 +51,29 @@ public class MultiEchoServer {
         }
     }
 
-    private static class ClientHandler extends Thread {
-        private Socket clientSocket;
-        private PrintWriter clientWriter;
+    // Inner class to handle communication with a client
+        private static class ClientHandler extends Thread {
+            private Socket clientSocket;
+            private PrintWriter clientWriter;
 
+            private String clientName;
 
+            public ClientHandler(Socket socket, PrintWriter writer) {
+                this.clientSocket = socket;
+                this.clientWriter = writer;
+                this.clientName = numClients + "";
+            }
 
-        private String clientName;
-
-        public ClientHandler(Socket socket, PrintWriter writer) {
-            this.clientSocket = socket;
-            this.clientWriter = writer;
-
-            this.clientName = numClients + "";
-        }
-
-        @Override
-        public void run() {
-            try (
-                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
-            ) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-
-                    //checks if the cleint types "exit" and if so closes the connection
-                    if (inputLine.equals("exit")) {
-                        clientSocket.close();
-
-                        break;
-                    }
-                    System.out.println("Received from client "+ clientName +" : " + inputLine);
-
-                    // Send the message to all connected clients
-                    for (PrintWriter writer : clientWriters) {
-                        if (writer != clientWriter) {
-                            writer.println("Client "+ clientName + " says: " + inputLine);
-                        }
-                    }
+            @Override
+            public void run() {
+                try {
+                    // Add the new MessageHandler thread to handle messages for this client
+                    new MessageHandler(clientSocket, clientWriter, clientWriters).start();
+                } catch (Exception e) {
+                    System.err.println("Error creating MessageHandler");
+                    e.printStackTrace();
                 }
-
-                System.out.println("Client disconnected");
-                clientWriters.remove(clientWriter);
-            } catch (IOException e) {
-                System.err.println("Error handling client communication");
-                e.printStackTrace();
             }
         }
+
     }
-}
