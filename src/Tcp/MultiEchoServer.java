@@ -1,4 +1,4 @@
-package Tcp;
+
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 // to run save changes and run in terminal
-// cs into src/Tcp and run:
+// cs into src and run:
 // Javac *.java
+// cd in Tcp
 // run:
 // java MultiEchoServer 10002
-// open another terminal and run:
-// java echoClient localhost 10002
+// open another terminal and cd into src and run:
+// java Main  localhost 10002
 // run ^ for as many clients as you need
 
 public class MultiEchoServer {
@@ -67,8 +68,9 @@ public class MultiEchoServer {
             @Override
             public void run() {
                 try {
+                    System.out.println("im watching");
                     // Add the new MessageHandler thread to handle messages for this client
-                    new MessageHandler(clientSocket, clientWriter, clientWriters).start();
+                    new MessageHandler(clientSocket, clientWriter, clientWriters, clientName).start();
                 } catch (Exception e) {
                     System.err.println("Error creating MessageHandler");
                     e.printStackTrace();

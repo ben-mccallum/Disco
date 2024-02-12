@@ -40,11 +40,28 @@ public class echoClient implements Runnable {
                 }
             }).start();
 
+            new Thread(() -> {
+                try {
+                    String userInput;
+                    while ((userInput = stdIn.readLine()) != null) {
+                        out.println(userInput);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error writing to server");
+                    e.printStackTrace();
+                }
+            }).start();
+
+            // Wait for both threads to finish
+            Thread.sleep(Long.MAX_VALUE);
+
+            /*
             String userInput;
             while ((userInput = stdIn.readLine()) != null) {
                 out.println(userInput);
                 System.out.println("echo: " + in.readLine());
             }
+             */
 
             out.close();
             in.close();
@@ -54,7 +71,7 @@ public class echoClient implements Runnable {
             System.err.println("Don't know about host " + hostName);
             e.printStackTrace();
             System.exit(1);
-        } catch (IOException e) {
+        } catch (IOException |  InterruptedException e) {
             System.err.println("Couldn't get I/O for the connection to " + hostName);
             e.printStackTrace();
             System.exit(1);
