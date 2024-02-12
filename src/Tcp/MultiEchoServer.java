@@ -1,18 +1,21 @@
+
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-
 // to run save changes and run in terminal
-// cs into src/Tcp and run:
+// cs into src and run:
 // Javac *.java
+// cd in Tcp
 // run:
 // java MultiEchoServer 10002
-// open another terminal and run:
-// java echoClient localhost 10002
+// open another terminal and cd into src and run:
+// java Main  localhost 10002
 // run ^ for as many clients as you need
+
 public class MultiEchoServer {
 
     private static List<PrintWriter> clientWriters = new ArrayList<>();
@@ -49,44 +52,30 @@ public class MultiEchoServer {
         }
     }
 
-    private static class ClientHandler extends Thread {
-        private Socket clientSocket;
-        private PrintWriter clientWriter;
+    // Inner class to handle communication with a client
+        private static class ClientHandler extends Thread {
+            private Socket clientSocket;
+            private PrintWriter clientWriter;
 
+            private String clientName;
 
+            public ClientHandler(Socket socket, PrintWriter writer) {
+                this.clientSocket = socket;
+                this.clientWriter = writer;
+                this.clientName = numClients + "";
+            }
 
-        private String clientName;
-
-        public ClientHandler(Socket socket, PrintWriter writer) {
-            this.clientSocket = socket;
-            this.clientWriter = writer;
-
-            this.clientName = numClients + "";
-        }
-
-        @Override
-        public void run() {
-            try (
-                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
-            ) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    System.out.println("Received from client "+ clientName +" : " + inputLine);
-
-                    // Send the message to all connected clients
-                    for (PrintWriter writer : clientWriters) {
-                        if (writer != clientWriter) {
-                            writer.println("Client "+ clientName + " says: " + inputLine);
-                        }
-                    }
+            @Override
+            public void run() {
+                try {
+                    System.out.println("im watching");
+                    // Add the new MessageHandler thread to handle messages for this client
+                    new MessageHandler(clientSocket, clientWriter, clientWriters, clientName).start();
+                } catch (Exception e) {
+                    System.err.println("Error creating MessageHandler");
+                    e.printStackTrace();
                 }
-
-                System.out.println("Client disconnected");
-                clientWriters.remove(clientWriter);
-            } catch (IOException e) {
-                System.err.println("Error handling client communication");
-                e.printStackTrace();
             }
         }
+
     }
-}
