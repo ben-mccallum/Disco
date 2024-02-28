@@ -28,6 +28,8 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("Server started and awaiting connections.");
+
         try {
             while (running) {
                 Socket client = server.accept();
@@ -44,7 +46,7 @@ public class Server implements Runnable {
     public void broadcast(String message) {
         for (ClientConnection cc : connections) {
             if (cc != null) {
-                cc.sendMessage(message);
+                cc.send(message);
             }
         }
     }
@@ -62,6 +64,8 @@ public class Server implements Runnable {
                     cc.stop();
                 }
             }
+
+            System.out.println("Server stopped.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
