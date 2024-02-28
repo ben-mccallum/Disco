@@ -1,14 +1,41 @@
 package uk.ac.strath;
 
-public class App {
-    private static App instance;
+import java.util.Arrays;
+import java.util.List;
 
+public class App {
+    public static final int PORT = 3000;
+    private static App instance;
+    private Client client;
+    private Server server;
+
+    // client constructor
+    private App(String ip) {
+        // TODO: client
+    }
+
+    // server constructor
     private App() {
-        System.out.println("Hello World!");
+        server = new Server();
+        server.run();
     }
 
     public static void main(String[] a) {
-        instance = new App();
+        List<String> args = Arrays.asList(a);
+
+        if (args.contains("-connect") && args.indexOf("-connect") + 1 < args.size()) {
+            instance = new App(args.get(args.indexOf("-connect") + 1));
+        } else {
+            instance = new App();
+        }
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public Server getServer() {
+        return server;
     }
 
     public static App getInstance() {
