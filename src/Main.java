@@ -3,7 +3,6 @@
 import java.net.*;
 import java.io.*;
 
-import Tcp.echoClient;
 public class Main{
     public static void main(String[] args) {
         // read hostname and portnumber from command line

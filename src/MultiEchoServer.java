@@ -9,7 +9,6 @@ import java.util.List;
 // to run save changes and run in terminal
 // cs into src and run:
 // Javac *.java
-// cd in Tcp
 // run:
 // java MultiEchoServer 10002
 // open another terminal and cd into src and run:
@@ -19,8 +18,7 @@ import java.util.List;
 public class MultiEchoServer {
 
     private static List<PrintWriter> clientWriters = new ArrayList<>();
-
-   public static int numClients = 0;
+    public static int numClients = 0;
 
     public static void main(String[] args) {
 
@@ -33,11 +31,15 @@ public class MultiEchoServer {
 
             System.out.println("Server listening on port " + portNumber);
 
+            
+
             // continuously accept new client connections
             while (true) {
                 // accepts a connection from a client
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected");
+
+                //Create instance of User
 
                 // create a new thread to handle communication with the client
                 PrintWriter clientWriter = new PrintWriter(clientSocket.getOutputStream(), true);
