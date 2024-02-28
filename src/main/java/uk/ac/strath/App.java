@@ -8,25 +8,31 @@ public class App {
     private static App instance;
     private Client client;
     private Server server;
+    private Thread thread;
 
     // client constructor
     private App(String ip) {
-        // TODO: client
+        instance = this;
+        client = new Client(ip);
+        thread = new Thread(client);
+        thread.start();
     }
 
     // server constructor
     private App() {
+        instance = this;
         server = new Server();
-        server.run();
+        thread = new Thread(server);
+        thread.start();
     }
 
     public static void main(String[] a) {
         List<String> args = Arrays.asList(a);
 
         if (args.contains("-connect") && args.indexOf("-connect") + 1 < args.size()) {
-            instance = new App(args.get(args.indexOf("-connect") + 1));
+            new App(args.get(args.indexOf("-connect") + 1));
         } else {
-            instance = new App();
+            new App();
         }
     }
 
