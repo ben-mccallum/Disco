@@ -1,5 +1,3 @@
-
-
 import java.net.*;
 import java.io.*;
 
@@ -10,6 +8,7 @@ public class Main{
         int portNumber = Integer.parseInt(args[1]);
 
         System.out.println("Server listening on port " + portNumber);
+
         System.out.println("New client connected");
 
         Thread clientThread = new Thread(new echoClient(hostName, portNumber));

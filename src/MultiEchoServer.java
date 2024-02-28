@@ -1,5 +1,3 @@
-
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -70,7 +68,6 @@ public class MultiEchoServer {
             @Override
             public void run() {
                 try {
-                    System.out.println("im watching");
                     // Add the new MessageHandler thread to handle messages for this client
                     new MessageHandler(clientSocket, clientWriter, clientWriters, clientName).start();
                 } catch (Exception e) {
