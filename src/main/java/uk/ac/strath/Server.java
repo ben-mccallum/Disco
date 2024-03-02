@@ -38,6 +38,8 @@ public class Server implements Runnable {
                 connections.add(cc);
                 pool.execute(cc);
             }
+
+            stop();
         } catch (IOException e) {
             stop();
         }

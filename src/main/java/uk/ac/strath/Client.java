@@ -14,14 +14,14 @@ public class Client implements Runnable {
     private Socket client;
     private PrintWriter out;
     private BufferedReader in;
-    private InputHandler console;
-    private Thread consoleThread;
+    private GUI gui;
+    private Thread guiThread;
     private UUID token;
 
     public Client(String ip) {
         running = true;
-        console = new InputHandler();
-        consoleThread = new Thread(console);
+        gui = new GUI(this);
+        guiThread = new Thread(gui);
 
         try {
             client = new Socket(ip, App.PORT);
@@ -34,7 +34,8 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        consoleThread.start();
+        guiThread.start();
+        out.println("IDENTIFY username password");
 
         String message;
 
@@ -58,13 +59,11 @@ public class Client implements Runnable {
                         break;
 
                     case "MESSAGE":
-                        if (!UUID.fromString(args.removeFirst()).equals(token)) {
-                            System.out.println(String.join(" ", args));
-                        }
+                        gui.showMessage("From: " + args.removeFirst() + "\n" + String.join(" ", args));
                         break;
 
                     case "NOTIFY":
-                        System.out.println(String.join(" ", args));
+                        gui.showMessage("From: system\n" + String.join(" ", args));
                         break;
 
                     default:

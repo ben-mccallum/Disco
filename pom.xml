@@ -12,23 +12,59 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <intellij.version>233.14015.106</intellij.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jetbrains.releases</id>
+            <url>https://www.jetbrains.com/intellij-repository/releases</url>
+        </repository>
+        <repository>
+            <id>jetbrains.3rdparty</id>
+            <url>https://cache-redirector.jetbrains.com/intellij-dependencies</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>
-                <version>3.3.0</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.1</version>
                 <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
                             <mainClass>uk.ac.strath.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jetbrains.intellij.java</groupId>
+            <artifactId>java-gui-forms-rt</artifactId>
+            <version>${intellij.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jetbrains.intellij.java</groupId>
+            <artifactId>java-compiler-ant-tasks</artifactId>
+            <version>${intellij.version}</version>
+        </dependency>
+    </dependencies>
 </project>

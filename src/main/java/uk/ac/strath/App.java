@@ -29,6 +29,7 @@ public class App {
     public static void main(String[] a) {
         List<String> args = Arrays.asList(a);
 
+        // determine whether the user is trying to run a server or connect to a server
         if (args.contains("-connect") && args.indexOf("-connect") + 1 < args.size()) {
             new App(args.get(args.indexOf("-connect") + 1));
         } else {
