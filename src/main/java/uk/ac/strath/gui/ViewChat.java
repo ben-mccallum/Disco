@@ -11,11 +11,11 @@ public class ViewChat extends View {
     private JButton send;
     private JTextField input;
 
-    public ViewChat(GUI ih) {
+    public ViewChat(GUI gui) {
         super("chat");
 
         send.addActionListener(e -> {
-            ih.sendMessage(input.getText());
+            gui.sendMessage(input.getText());
             input.setText("");
         });
     }

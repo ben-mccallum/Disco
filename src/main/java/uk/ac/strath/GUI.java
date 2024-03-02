@@ -4,7 +4,9 @@ import uk.ac.strath.gui.View;
 import uk.ac.strath.gui.ViewChat;
 
 import javax.swing.*;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class GUI implements Runnable {
     private Client client;
@@ -49,6 +51,27 @@ public class GUI implements Runnable {
     }
 
     public void sendMessage(String message) {
-        client.send("MESSAGE " + client.getToken().toString() + " " + message);
+        LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
+        String cmd = args.removeFirst();
+
+        if (client.getToken() == null && !cmd.equals("/login")) {
+            showMessage("You are not logged in!");
+            return;
+        }
+
+        switch (cmd) {
+            case "/login":
+                if (args.size() < 2) {
+                    showMessage("Please provide a username and password!");
+                    return;
+                }
+
+                client.send("IDENTIFY " + args.get(0) + " " + args.get(1));
+                break;
+
+            default:
+                client.send("MESSAGE " + client.getToken().toString() + " " + message);
+                break;
+        }
     }
 }

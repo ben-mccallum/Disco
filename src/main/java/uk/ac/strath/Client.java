@@ -35,7 +35,6 @@ public class Client implements Runnable {
     @Override
     public void run() {
         guiThread.start();
-        out.println("IDENTIFY username password");
 
         String message;
 
@@ -55,7 +54,7 @@ public class Client implements Runnable {
                         }
 
                         token = UUID.fromString(args.getFirst());
-                        System.out.println("Logged in as " + token.toString());
+                        gui.showMessage("Logged in as " + token.toString());
                         break;
 
                     case "MESSAGE":
@@ -63,7 +62,7 @@ public class Client implements Runnable {
                         break;
 
                     case "NOTIFY":
-                        gui.showMessage("From: system\n" + String.join(" ", args));
+                        gui.showMessage(String.join(" ", args));
                         break;
 
                     default:
