@@ -3,6 +3,7 @@ package uk.ac.strath;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -13,6 +14,7 @@ public class Server implements Runnable {
     private List<ClientConnection> connections;
     private ExecutorService pool;
     private ServerSocket server;
+    private Database database;
 
     public Server() {
         running = true;
@@ -20,8 +22,13 @@ public class Server implements Runnable {
         pool = Executors.newCachedThreadPool();
 
         try {
+            database = new Database("jdbc:mysql://localhost/chatapp", "root", "");
             server = new ServerSocket(App.PORT);
         } catch (IOException e) {
+            System.out.println("Error binding to port " + App.PORT + "!");
+            running = false;
+        } catch (SQLException e) {
+            System.out.println("Error connecting to database!");
             running = false;
         }
     }
@@ -71,6 +78,10 @@ public class Server implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 
     public boolean isRunning() {

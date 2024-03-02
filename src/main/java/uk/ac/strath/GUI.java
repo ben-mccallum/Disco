@@ -54,11 +54,6 @@ public class GUI implements Runnable {
         LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
         String cmd = args.removeFirst();
 
-        if (client.getToken() == null && !cmd.equals("/login")) {
-            showMessage("You are not logged in!");
-            return;
-        }
-
         switch (cmd) {
             case "/login":
                 if (args.size() < 2) {
@@ -70,7 +65,7 @@ public class GUI implements Runnable {
                 break;
 
             default:
-                client.send("MESSAGE " + client.getToken().toString() + " " + message);
+                client.send("MESSAGE " + message);
                 break;
         }
     }

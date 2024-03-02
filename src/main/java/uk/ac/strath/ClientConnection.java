@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.UUID;
 
 public class ClientConnection implements Runnable {
     private Socket client;
     private PrintWriter out;
     private BufferedReader in;
-    private UUID userID;
+    private User user;
 
     public ClientConnection(Socket client) {
         this.client = client;
@@ -35,7 +35,7 @@ public class ClientConnection implements Runnable {
                 LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
                 String op = args.removeFirst();
 
-                if (userID == null && !op.equals("IDENTIFY")) {
+                if (user == null && !op.equals("IDENTIFY")) {
                     send("NOTIFY You are not logged in!");
                     continue;
                 }
@@ -47,24 +47,31 @@ public class ClientConnection implements Runnable {
                             break;
                         }
 
-                        if (args.get(0).equals("username") && args.get(1).equals("password")) {
-                            userID = UUID.randomUUID();
+                        User userLogin = App.getInstance().getServer().getDatabase().getUser(args.get(0));
 
-                            send("HANDSHAKE " + userID.toString());
+                        if (userLogin == null) {
+                            send("NOTIFY User does not exist!");
+                            break;
+                        }
+
+                        if (args.get(1).equals(userLogin.getPassword())) {
+                            user = userLogin;
+
+                            send("HANDSHAKE " + userLogin.getUsername());
                         } else {
                             send("NOTIFY Invalid username or password!");
                         }
                         break;
 
                     case "MESSAGE":
-                        App.getInstance().getServer().broadcast("MESSAGE " + String.join(" ", args));
+                        App.getInstance().getServer().broadcast("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                         break;
 
                     default:
                         break;
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             stop();
         }
     }

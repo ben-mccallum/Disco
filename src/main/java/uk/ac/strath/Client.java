@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.UUID;
 
 public class Client implements Runnable {
     private boolean running;
@@ -16,7 +15,6 @@ public class Client implements Runnable {
     private BufferedReader in;
     private GUI gui;
     private Thread guiThread;
-    private UUID token;
 
     public Client(String ip) {
         running = true;
@@ -43,22 +41,17 @@ public class Client implements Runnable {
                 LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
                 String op = args.removeFirst();
 
-                if (token == null && !op.equals("HANDSHAKE") && !op.equals("NOTIFY")) {
-                    continue;
-                }
-
                 switch (op) {
                     case "HANDSHAKE":
                         if (args.isEmpty()) {
                             break;
                         }
 
-                        token = UUID.fromString(args.getFirst());
-                        gui.showMessage("Logged in as " + token.toString());
+                        gui.showMessage("Logged in as " + args.getFirst());
                         break;
 
                     case "MESSAGE":
-                        gui.showMessage("From: " + args.removeFirst() + "\n" + String.join(" ", args));
+                        gui.showMessage("[" + args.removeFirst() + "] " + String.join(" ", args));
                         break;
 
                     case "NOTIFY":
@@ -95,9 +88,5 @@ public class Client implements Runnable {
 
     public boolean isRunning() {
         return running;
-    }
-
-    public UUID getToken() {
-        return token;
     }
 }
