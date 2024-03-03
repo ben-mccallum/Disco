@@ -15,11 +15,13 @@ public class Server implements Runnable {
     private ExecutorService pool;
     private ServerSocket server;
     private Database database;
+    private ArrayList<GroupChat> chatRooms;
 
     public Server() {
         running = true;
         connections = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
+        chatRooms = new ArrayList<>();
 
         try {
             database = new Database("jdbc:mysql://localhost/cgb21121", "cgb21121", "esh0CaijooQu");
@@ -35,12 +37,16 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Server started and awaiting connections.");
-
+        if(running){
+            System.out.println("Server started and awaiting connections.");
+        }else{
+            stop();
+            return;
+        }
         try {
             while (running) {
                 Socket client = server.accept();
-                ClientConnection cc = new ClientConnection(client);
+                ClientConnection cc = new ClientConnection(client, this);
 
                 connections.add(cc);
                 pool.execute(cc);
@@ -86,5 +92,15 @@ public class Server implements Runnable {
 
     public boolean isRunning() {
         return running;
+    }
+
+    public GroupChat newChat(ClientConnection c, String chatName){
+        GroupChat chat = new GroupChat(c, chatName);
+        chatRooms.add(chat);
+        return chat;
+    }
+
+    public ArrayList<GroupChat> getChats(){
+        return chatRooms;
     }
 }

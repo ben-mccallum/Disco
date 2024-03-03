@@ -14,6 +14,7 @@ public class ViewChat extends View {
     public ViewChat(GUI gui) {
         super("chat");
 
+
         send.addActionListener(e -> {
             gui.sendMessage(input.getText());
             input.setText("");

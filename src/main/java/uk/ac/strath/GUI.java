@@ -48,7 +48,6 @@ public class GUI implements Runnable {
     public void run() {
         setView("chat");
 
-
     }
 
     public void showMessage(String message) {
@@ -75,7 +74,6 @@ public class GUI implements Runnable {
                 break;
 
             case "/chat":
-
                 if(args.isEmpty()){
                     showMessage("Please provide which chat you want to display!");
                     return;
@@ -84,6 +82,14 @@ public class GUI implements Runnable {
                 client.send("CHANNEL " + args.get(0));
                 clearChat();
                 break;
+
+            case "/create":
+                if(args.size() < 2){
+                    showMessage("Please provide a username and a password!");
+
+                    client.send("CREATE " + args.get(0) + " " + args.get(1));
+                    return;
+                }
 
             case "/help":
                 if(args.size() > 1){

@@ -9,6 +9,16 @@ public class Database {
         conn = DriverManager.getConnection(url, user, password);
     }
 
+    public void addUser(String username, String password) throws SQLException {
+        PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `users` (`username`, `password`) VALUES (?,?);");
+
+        pstmt.setString(1, username);
+        pstmt.setString(2, password);
+
+
+        pstmt.executeUpdate();
+    }
+
     public User getUser(String username) throws SQLException {
         PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM `users` WHERE `username`=?;");
 

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -14,9 +15,11 @@ public class ClientConnection implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     private User user;
+    private Server serve;
 
-    public ClientConnection(Socket client) {
+    public ClientConnection(Socket client, Server s) {
         this.client = client;
+        this.serve = s;
 
         try {
             out = new PrintWriter(client.getOutputStream(), true);
@@ -47,7 +50,7 @@ public class ClientConnection implements Runnable {
                             break;
                         }
 
-                        User userLogin = App.getInstance().getServer().getDatabase().getUser(args.get(0));
+                        User userLogin = serve.getDatabase().getUser(args.get(0));
 
                         if (userLogin == null) {
                             send("NOTIFY User does not exist!");
@@ -64,17 +67,27 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "MESSAGE":
-                        App.getInstance().getServer().broadcast("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                        serve.broadcast("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                        break;
+
+                    case "CREATE":
+                        App.getInstance().getServer().getDatabase().addUser(args.get(0),args.get(1));
                         break;
 
                     case "CHANNEL":
-                        App.getInstance().getServer().broadcast("CHANNEL " +  String.join(" ", args));
+                        serve.broadcast("CHANNEL " +  String.join(" ", args));
                         String chat = args.get(0);
                         send("NOTIFY Welcome to " + chat);
-                        new GroupChat();
+                        ArrayList<GroupChat> ChatRooms = App.getInstance().getServer().getChats();
+                        for(GroupChat r: ChatRooms){
+                            if(r.getID().equals(chat)){
+                                this.serve = r;
+                            }else{
+                                App.getInstance().getServer().newChat(this, chat);
+                            }
+                            break;
+                        }
 
-
-                        break;
                     default:
                         break;
                 }
