@@ -67,6 +67,14 @@ public class ClientConnection implements Runnable {
                         App.getInstance().getServer().broadcast("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                         break;
 
+                    case "CHANNEL":
+                        App.getInstance().getServer().broadcast("CHANNEL " +  String.join(" ", args));
+                        String chat = args.get(0);
+                        send("NOTIFY Welcome to " + chat);
+                        new GroupChat();
+
+
+                        break;
                     default:
                         break;
                 }

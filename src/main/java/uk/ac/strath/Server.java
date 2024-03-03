@@ -22,7 +22,7 @@ public class Server implements Runnable {
         pool = Executors.newCachedThreadPool();
 
         try {
-            database = new Database("jdbc:mysql://localhost/chatapp", "root", "");
+            database = new Database("jdbc:mysql://localhost/cgb21121", "cgb21121", "esh0CaijooQu");
             server = new ServerSocket(App.PORT);
         } catch (IOException e) {
             System.out.println("Error binding to port " + App.PORT + "!");
