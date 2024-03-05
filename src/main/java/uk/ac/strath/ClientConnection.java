@@ -67,7 +67,9 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "MESSAGE":
-                        serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                        if (!args.isEmpty()) {
+                            serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                        }
                         break;
 
                     case "SIGNUP":

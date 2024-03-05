@@ -115,7 +115,9 @@ public class GUI implements Runnable {
                 break;
 
             default:
-                client.send("MESSAGE " + message);
+                if (!message.isEmpty()) {
+                    client.send("MESSAGE " + message);
+                }
                 break;
         }
     }
