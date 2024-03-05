@@ -6,16 +6,17 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
-    private boolean running;
-    private List<ClientConnection> connections;
-    private ExecutorService pool;
-    private ServerSocket server;
-    private Database database;
-    private ArrayList<GroupChat> chatRooms;
+    protected boolean running;
+    protected List<ClientConnection> connections;
+    protected ExecutorService pool;
+    protected ServerSocket server;
+    protected Database database;
+    protected ArrayList<GroupChat> chatRooms;
 
     public Server() {
         running = true;
@@ -58,6 +59,39 @@ public class Server implements Runnable {
         }
     }
 
+    public void broadcastMessage(String message) {
+        if (chatRooms.isEmpty()) {
+            for (ClientConnection cc : connections) {
+                if (cc != null) {
+                    cc.send(message);
+                }
+            }
+        } else {
+            String[] parts = message.split(" ");
+            String username = parts[1];
+            boolean inchat = false;
+            for (GroupChat gc : chatRooms) {
+                for (String user : gc.getMembers()) {
+                    if (Objects.equals(user, username)) {
+                        inchat = true;
+                        for (ClientConnection cc : gc.getConnections()) {
+                            if (cc != null) {
+                                cc.send(message);
+                            }
+                        }
+                    }
+                }
+            }
+            if (!inchat) {
+                for (ClientConnection cc : connections) {
+                    if (cc != null) {
+                        cc.send(message);
+                    }
+                }
+            }
+        }
+    }
+
     public void broadcast(String message) {
         for (ClientConnection cc : connections) {
             if (cc != null) {
@@ -94,10 +128,10 @@ public class Server implements Runnable {
         return running;
     }
 
-    public GroupChat newChat(ClientConnection c, String chatName){
-        GroupChat chat = new GroupChat(c, chatName);
+    public void newChat(ClientConnection c, String chatName, String user){
+        GroupChat chat = new GroupChat(c, chatName, user);
         chatRooms.add(chat);
-        return chat;
+        connections.removeIf(cc -> cc == c);
     }
 
     public ArrayList<GroupChat> getChats(){

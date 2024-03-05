@@ -67,7 +67,7 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "MESSAGE":
-                        serve.broadcast("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                        serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                         break;
 
                     case "CREATE":
@@ -77,16 +77,21 @@ public class ClientConnection implements Runnable {
                     case "CHANNEL":
                         serve.broadcast("CHANNEL " +  String.join(" ", args));
                         String chat = args.get(0);
-                        send("NOTIFY Welcome to " + chat);
                         ArrayList<GroupChat> ChatRooms = App.getInstance().getServer().getChats();
-                        for(GroupChat r: ChatRooms){
-                            if(r.getID().equals(chat)){
-                                this.serve = r;
-                            }else{
-                                App.getInstance().getServer().newChat(this, chat);
+                        if (ChatRooms.isEmpty()) {
+                            App.getInstance().getServer().newChat(this, chat, user.getUsername());
+                        } else {
+                            for(GroupChat r: ChatRooms){
+                                if(r.getID().equals(chat)){
+                                    System.out.println(user.getUsername());
+                                    r.addMember(serve, this, user.getUsername());
+                                }else{
+                                    App.getInstance().getServer().newChat(this, chat, user.getUsername());
+                                }
                             }
-                            break;
                         }
+                        send("NOTIFY Welcome to " + chat);
+                        break;
 
                     default:
                         break;

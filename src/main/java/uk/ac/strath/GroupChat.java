@@ -3,22 +3,17 @@ package uk.ac.strath;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupChat extends Server implements Runnable{
-    private List<ClientConnection> connections;
+public class GroupChat implements Runnable{
+    private List<ClientConnection> gcconnections;
+    private List<String> Members;
     private String ID;
 
-    public GroupChat(ClientConnection cc, String chatname){
-        connections = new ArrayList<>();
-        connections.add(cc);
+    public GroupChat(ClientConnection cc, String chatname, String user){
+        gcconnections = new ArrayList<>();
+        gcconnections.add(cc);
+        Members = new ArrayList<>();
+        Members.add(user);
         ID = chatname;
-    }
-
-    public void broadcast(String message) {
-        for (ClientConnection cc : connections) {
-            if (cc != null) {
-                cc.send(message);
-            }
-        }
     }
 
     @Override
@@ -27,5 +22,19 @@ public class GroupChat extends Server implements Runnable{
 
     public String getID(){
         return ID;
+    }
+
+    public List<String> getMembers(){
+        return Members;
+    }
+
+    public List<ClientConnection> getConnections(){
+        return gcconnections;
+    }
+
+    public void addMember(Server s, ClientConnection cc, String user) {
+        s.connections.removeIf(c -> c == cc);
+        Members.add(user);
+        gcconnections.add(cc);
     }
 }
