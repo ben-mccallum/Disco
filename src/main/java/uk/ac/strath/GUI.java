@@ -83,13 +83,6 @@ public class GUI implements Runnable {
                 clearChat();
                 break;
 
-            case "/create":
-                if(args.size() < 2){
-                    showMessage("Please provide a username and a password!");
-
-                    client.send("CREATE " + args.get(0) + " " + args.get(1));
-                    return;
-                }
 
             case "/help":
                 if(args.size() > 1){
@@ -99,11 +92,27 @@ public class GUI implements Runnable {
                 showMessage(" ");
                 showMessage("---------------------------------------------------");
                 showMessage("To login, type '/login' followed by your username and password");
-                showMessage("Once you're logged in, you can send messages here, or use /chat to enter a specific chatroom");
-                showMessage("For help with a specific command, type '/help' followed by the command, e.g. '/help login'");
+                showMessage("Once you're logged in, you can send messages here, or use '/chat' to enter a specific chatroom");
+                showMessage("To create a new account, type '/signup' followed by your username and password");
+                showMessage("To logout, type '/logout'");
+                showMessage("To see this message again, type '/help'");
                 showMessage("---------------------------------------------------");
                 showMessage(" ");
                 return;
+
+
+            case "/signup":
+                if(args.size() < 2){
+                    showMessage("Please provide a username and a password!");
+                    return;
+                }
+                client.send("SIGNUP " + args.get(0) + " " + args.get(1));
+                break;
+
+
+            case "/logout":
+                client.send("LOGOUT");
+                break;
 
             default:
                 client.send("MESSAGE " + message);

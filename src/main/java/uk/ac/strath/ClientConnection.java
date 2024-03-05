@@ -38,7 +38,7 @@ public class ClientConnection implements Runnable {
                 LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
                 String op = args.removeFirst();
 
-                if (user == null && !op.equals("IDENTIFY")) {
+                if (user == null && !op.equals("IDENTIFY") && !op.equals("SIGNUP")){
                     send("NOTIFY You are not logged in!");
                     continue;
                 }
@@ -70,8 +70,20 @@ public class ClientConnection implements Runnable {
                         serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                         break;
 
-                    case "CREATE":
-                        App.getInstance().getServer().getDatabase().addUser(args.get(0),args.get(1));
+                    case "SIGNUP":
+                        if (args.size() < 2) {
+                            send("NOTIFY Please provide a username and password!");
+                            break;
+                        }
+
+                        if (serve.getDatabase().getUser(args.get(0)) != null) {
+                            send("NOTIFY Username already taken!");
+                            break;
+                        }
+
+                        send("NOTIFY Creating user " + args.get(0) +  "!");
+                        serve.getDatabase().addUser(args.get(0), args.get(1));
+
                         break;
 
                     case "CHANNEL":
@@ -91,6 +103,12 @@ public class ClientConnection implements Runnable {
                             }
                         }
                         send("NOTIFY Welcome to " + chat);
+                        break;
+
+
+                    case "LOGOUT":
+                        user = null;
+                        send("NOTIFY You have been logged out!");
                         break;
 
                     default:
