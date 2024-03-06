@@ -33,6 +33,9 @@ public class GroupChat implements Runnable{
     }
 
     public void addMember(Server s, ClientConnection cc, String user) {
+        for (GroupChat gc : s.getChats()) {
+            gc.getConnections().removeIf(c -> c == cc);
+        }
         s.connections.removeIf(c -> c == cc);
         Members.add(user);
         gcconnections.add(cc);
