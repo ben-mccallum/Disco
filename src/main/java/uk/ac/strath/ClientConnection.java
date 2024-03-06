@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class ClientConnection implements Runnable {
     private Socket client;
@@ -96,9 +97,17 @@ public class ClientConnection implements Runnable {
                             App.getInstance().getServer().newChat(this, chat, user.getUsername());
                         } else {
                             for(GroupChat r: ChatRooms){
+                                boolean inchat = false;
                                 if(r.getID().equals(chat)){
-                                    System.out.println(user.getUsername());
-                                    r.addMember(serve, this, user.getUsername());
+                                    for (String username : r.getMembers()) {
+                                        if (Objects.equals(user.getUsername(), username)) {
+                                            send("NOTIFY You are already in this chat");
+                                            inchat = true;
+                                        }
+                                    }
+                                    if (!inchat){
+                                        r.addMember(serve, this, user.getUsername());
+                                    }
                                 }else{
                                     App.getInstance().getServer().newChat(this, chat, user.getUsername());
                                 }
