@@ -114,6 +114,16 @@ public class GUI implements Runnable {
                 client.send("LOGOUT");
                 break;
 
+            case "/leave":
+                client.send("LEAVE");
+                clearChat();
+                break;
+
+
+            case "/online":
+                client.send("ONLINE");
+                break;
+
             default:
                 if (!message.isEmpty()) {
                     client.send("MESSAGE " + message);

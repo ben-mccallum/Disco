@@ -129,9 +129,20 @@ public class Server implements Runnable {
     }
 
     public void newChat(ClientConnection c, String chatName, String user){
+        for (GroupChat gc : chatRooms) {
+            gc.getConnections().removeIf(cc -> cc == c);
+        }
+        connections.removeIf(cc -> cc == c);
         GroupChat chat = new GroupChat(c, chatName, user);
         chatRooms.add(chat);
-        connections.removeIf(cc -> cc == c);
+    }
+
+    public void leaveChat(ClientConnection c, String user){
+        for (GroupChat gc : chatRooms) {
+            gc.getConnections().removeIf(cc -> cc == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        connections.add(c);
     }
 
     public ArrayList<GroupChat> getChats(){

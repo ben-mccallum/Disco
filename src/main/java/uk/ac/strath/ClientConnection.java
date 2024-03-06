@@ -95,13 +95,16 @@ public class ClientConnection implements Runnable {
                         if (ChatRooms.isEmpty()) {
                             App.getInstance().getServer().newChat(this, chat, user.getUsername());
                         } else {
+                            boolean chatexists = false;
                             for(GroupChat r: ChatRooms){
                                 if(r.getID().equals(chat)){
-                                    System.out.println(user.getUsername());
                                     r.addMember(serve, this, user.getUsername());
-                                }else{
-                                    App.getInstance().getServer().newChat(this, chat, user.getUsername());
+                                    chatexists = true;
                                 }
+                            }
+                            if (!chatexists) {
+                                //line referring to balls
+                                App.getInstance().getServer().newChat(this, chat, user.getUsername());
                             }
                         }
                         send("NOTIFY Welcome to " + chat);
@@ -112,6 +115,14 @@ public class ClientConnection implements Runnable {
                         user = null;
                         send("NOTIFY You have been logged out!");
                         break;
+
+                    case "LEAVE":
+                        send("NOTIFY Leaving chat");
+                        App.getInstance().getServer().leaveChat(this, user.getUsername());
+                        send("NOTIFY Welcome back!");
+
+                        break;
+
 
                     default:
                         break;
