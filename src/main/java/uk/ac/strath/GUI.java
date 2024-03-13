@@ -83,6 +83,16 @@ public class GUI implements Runnable {
                 clearChat();
                 break;
 
+            case "/dm":
+                if(args.isEmpty()){
+                    showMessage("Please provide which user you want to message!");
+                    return;
+                }
+
+                client.send("DM " + args.get(0));
+                clearChat();
+                break;
+
 
             case "/help":
                 if(args.size() > 1){

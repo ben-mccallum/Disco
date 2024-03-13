@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable {
     protected boolean running;
     protected List<ClientConnection> connections;
+    protected List<String> connectedUsers;
     protected ExecutorService pool;
     protected ServerSocket server;
     protected Database database;
@@ -21,6 +22,7 @@ public class Server implements Runnable {
     public Server() {
         running = true;
         connections = new ArrayList<>();
+        connectedUsers = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
         chatRooms = new ArrayList<>();
 
@@ -147,5 +149,17 @@ public class Server implements Runnable {
 
     public ArrayList<GroupChat> getChats(){
         return chatRooms;
+    }
+
+    public List<String> getConnected(){
+    return connectedUsers;
+}
+
+    public void addConnectedUser(String User){
+        connectedUsers.add(User);
+    }
+
+    public List<ClientConnection> getConnections(){
+        return connections;
     }
 }

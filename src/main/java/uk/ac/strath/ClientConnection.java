@@ -6,9 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
 
 public class ClientConnection implements Runnable {
     private Socket client;
@@ -61,6 +59,7 @@ public class ClientConnection implements Runnable {
                             user = userLogin;
 
                             send("HANDSHAKE " + userLogin.getUsername());
+                            App.getInstance().getServer().addConnectedUser(args.getFirst());
                         } else {
                             send("NOTIFY Invalid username or password!");
                         }
@@ -85,6 +84,7 @@ public class ClientConnection implements Runnable {
 
                         send("NOTIFY Creating user " + args.get(0) +  "!");
                         serve.getDatabase().addUser(args.get(0), args.get(1));
+                        App.getInstance().getServer().addConnectedUser(args.get(0));
 
                         break;
 
@@ -110,6 +110,44 @@ public class ClientConnection implements Runnable {
                         send("NOTIFY Welcome to " + chat);
                         break;
 
+                    case "DM":
+                        String userDM = args.get(0);
+                        boolean online = false;
+                        ClientConnection cc = null;
+                        for (GroupChat gc : serve.getChats()){
+                            Integer index = 0;
+                            for (String u : gc.getMembers()){
+                                if (Objects.equals(userDM, u)) {
+                                    online = true;
+                                    List<ClientConnection> ccs = gc.getConnections();
+                                    cc = ccs.get(index);
+                                    break;
+                                }
+                                index ++;
+                            }
+                        }
+                        if (!online) {
+                            Integer index = 0;
+                            for (String u : serve.getConnected()) {
+                                if (Objects.equals(userDM, u)) {
+                                    online = true;
+                                    List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
+                                    cc = ccs.get(index);
+                                    break;
+                                }
+                                index ++;
+                            }
+                        }
+                        if (!online) {
+                            send("NOTIFY That user is not online!");
+                            break;
+                        } else {
+                            send("Waiting for User to accept...");
+                            cc.send("NOTIFY " + user.getUsername() + "wants to start a dm with you, /yes to accept, /no to decline");
+                        }
+                        break;
+
+
 
                     case "LOGOUT":
                         user = null;
@@ -123,6 +161,14 @@ public class ClientConnection implements Runnable {
 
                         break;
 
+                    case "ONLINE":
+                        ArrayList<String> onlineUsers = new ArrayList<>();
+                        for (GroupChat gc : serve.getChats()){
+                            for (String u : gc.getMembers()){
+                                onlineUsers.add(u);
+                            }
+                        }
+                        send("NOTIFY Online users: " + onlineUsers);
 
                     default:
                         break;
