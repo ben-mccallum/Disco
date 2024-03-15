@@ -86,22 +86,7 @@ public class Server implements Runnable {
                     }
                 }
             }
-            boolean indm = false;
             if (!inchat) {
-                for (DirectMessage dm : activeDMs) {
-                    for (String user : dm.getMembers()) {
-                        if (Objects.equals(user, username)) {
-                            indm = true;
-                            for (ClientConnection cc : dm.getConnections()) {
-                                if (cc != null) {
-                                    cc.send(message);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!inchat && !indm) {
                 for (ClientConnection cc : connections) {
                     if (cc != null) {
                         cc.send(message);
@@ -163,12 +148,24 @@ public class Server implements Runnable {
     }
 
     public void leaveChat(ClientConnection c, String user){
+        boolean inchat = false;
         for (GroupChat gc : chatRooms) {
+            boolean remove = false;
             gc.getConnections().removeIf(cc -> cc == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+            for (String u : gc.getMembers()) {
+                if(Objects.equals(u, user)){
+                    inchat = true;
+                    remove = true;
+                }
+            }
+            if (remove){
+                gc.getMembers().remove(user);
+            }
         }
-        connections.add(c);
-        connectedUsers.add(user);
+        if (inchat){
+            connections.add(c);
+            connectedUsers.add(user);
+        }
     }
 
     public ArrayList<GroupChat> getChats(){
@@ -189,21 +186,6 @@ public class Server implements Runnable {
 
     public List<ClientConnection> getConnections(){
         return connections;
-    }
-
-    public void dmSetUp(String user, String userWaiting, ClientConnection c, ClientConnection cc){
-        for (GroupChat gc : chatRooms) {
-            gc.getConnections().removeIf(con -> con == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        for (DirectMessage dm : activeDMs) {
-            dm.getConnections().removeIf(con -> con == c);
-            dm.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        connections.removeIf(con -> con == c);
-        connectedUsers.removeIf(u -> Objects.equals(u, user));
-        DirectMessage dm = new DirectMessage(user, userWaiting, c, cc);
-        activeDMs.add(dm);
     }
 
 }

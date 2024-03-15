@@ -14,10 +14,14 @@ public class ClientConnection implements Runnable {
     private BufferedReader in;
     private User user;
     private Server serve;
+    protected boolean indm;
+    protected ClientConnection connectedTo;
+    protected DirectMessage activeDM;
 
     public ClientConnection(Socket client, Server s) {
         this.client = client;
         this.serve = s;
+        indm = false;
 
         try {
             out = new PrintWriter(client.getOutputStream(), true);
@@ -67,7 +71,12 @@ public class ClientConnection implements Runnable {
 
                     case "MESSAGE":
                         if (!args.isEmpty()) {
-                            serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                            if (!indm) {
+                                serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                            } else {
+                                connectedTo.send("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                                send("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
+                            }
                         }
                         break;
 
@@ -84,7 +93,6 @@ public class ClientConnection implements Runnable {
 
                         send("NOTIFY Creating user " + args.get(0) +  "!");
                         serve.getDatabase().addUser(args.get(0), args.get(1));
-                        App.getInstance().getServer().addConnectedUser(args.get(0));
 
                         break;
 
@@ -112,46 +120,51 @@ public class ClientConnection implements Runnable {
 
                     case "DM":
                         String userDM = args.get(0);
-                        boolean online = false;
-                        ClientConnection c = null;
-                        ClientConnection cc = null;
-                        for (GroupChat gc : serve.getChats()){
-                            Integer index = 0;
-                            for (String u : gc.getMembers()){
-                                if (Objects.equals(userDM, u)) {
-                                    online = true;
-                                    List<ClientConnection> ccs = gc.getConnections();
-                                    cc = ccs.get(index);
-                                }
-                                if (Objects.equals(user.getUsername(), u)) {
-                                    List<ClientConnection> ccs = gc.getConnections();
-                                    c = ccs.get(index);
-                                }
-                                index ++;
-                            }
-                        }
-                        if (!online) {
-                            Integer index = 0;
-                            for (String u : serve.getConnected()) {
-                                if (Objects.equals(userDM, u)) {
-                                    online = true;
-                                    List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
-                                    cc = ccs.get(index);
-                                }
-                                if (Objects.equals(user.getUsername(), u)) {
-                                    List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
-                                    c = ccs.get(index);
-                                }
-                                index ++;
-                            }
-                        }
-                        if (!online) {
-                            send("NOTIFY That user is not online!");
-                            break;
+                        if (Objects.equals(userDM, user.getUsername())){
+                            send("NOTIFY You can't start a dm with yourself!");
                         } else {
-                            send("You have entered a dm, waiting for invited user to accept...");
-                            cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
-                            serve.dmSetUp(user.getUsername(), userDM, c, cc);
+                            boolean online = false;
+                            ClientConnection c = null;
+                            ClientConnection cc = null;
+                            for (GroupChat gc : serve.getChats()) {
+                                Integer index = 0;
+                                for (String u : gc.getMembers()) {
+                                    if (Objects.equals(userDM, u)) {
+                                        online = true;
+                                        List<ClientConnection> ccs = gc.getConnections();
+                                        cc = ccs.get(index);
+                                    }
+                                    if (Objects.equals(user.getUsername(), u)) {
+                                        List<ClientConnection> ccs = gc.getConnections();
+                                        c = ccs.get(index);
+                                    }
+                                    index++;
+                                }
+                            }
+                            if (!online) {
+                                Integer index = 0;
+                                for (String u : serve.getConnected()) {
+                                    if (Objects.equals(userDM, u)) {
+                                        online = true;
+                                        List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
+                                        cc = ccs.get(index);
+                                    }
+                                    if (Objects.equals(user.getUsername(), u)) {
+                                        List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
+                                        c = ccs.get(index);
+                                    }
+                                    index++;
+                                }
+                            }
+                            if (!online) {
+                                send("NOTIFY That user is not online!");
+                                break;
+                            } else {
+                                send("You have entered a dm, waiting for invited user to accept...");
+                                indm = true;
+                                cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
+                                dmSetUp(user.getUsername(), userDM, c, cc);
+                            }
                         }
                         break;
 
@@ -160,7 +173,9 @@ public class ClientConnection implements Runnable {
                         for (DirectMessage dm : serve.getActiveDMs()) {
                             if (Objects.equals(user.getUsername(), dm.getWaiting())) {
                                 waiting = true;
-                                dm.acceptRequest(serve);
+                                indm = true;
+                                activeDM = dm;
+                                activeDM.acceptRequest(serve);
                             }
                         }
                         if (!waiting){
@@ -195,9 +210,25 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "LEAVE":
-                        send("NOTIFY Leaving chat");
-                        App.getInstance().getServer().leaveChat(this, user.getUsername());
-                        send("NOTIFY Welcome back!");
+                        if (!indm) {
+                            send("NOTIFY Leaving chat");
+                            App.getInstance().getServer().leaveChat(this, user.getUsername());
+                            send("NOTIFY Welcome back!");
+                        } else {
+                            send("NOTIFY You have left your direct message, returning to main chat");
+                            connectedTo.send("NOTIFY The user you were talking to has left this direct message, returning to main chat");
+                            connectedTo.indm = false;
+                            indm = false;
+                            connectedTo.activeDM = null;
+                            serve.connections.add(connectedTo);
+                            serve.connectedUsers.add(activeDM.Members.get(1));
+                            serve.connections.add(connectedTo.connectedTo);
+                            serve.connectedUsers.add(activeDM.Members.get(0));
+                            connectedTo.connectedTo = null;
+                            connectedTo = null;
+                            serve.activeDMs.remove(activeDM);
+                            activeDM = null;
+                        }
 
                         break;
 
@@ -234,5 +265,20 @@ public class ClientConnection implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void dmSetUp(String user, String userWaiting, ClientConnection c, ClientConnection cc){
+        for (GroupChat gc : serve.chatRooms) {
+            gc.getConnections().removeIf(con -> con == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage d : serve.activeDMs) {
+            d.getConnections().removeIf(con -> con == c);
+            d.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        serve.connections.removeIf(con -> con == c);
+        serve.connectedUsers.removeIf(u -> Objects.equals(u, user));
+        activeDM = new DirectMessage(user, userWaiting, c, cc);
+        serve.activeDMs.add(activeDM);
     }
 }

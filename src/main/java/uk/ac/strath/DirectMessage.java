@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class DirectMessage implements Runnable {
     private List<ClientConnection> dmconnections;
-    private List<String> Members;
+    protected List<String> Members;
     private ClientConnection waitingC;
     private String waiting;
 
@@ -38,6 +38,8 @@ public class DirectMessage implements Runnable {
         }
         s.connections.removeIf(c -> c == waitingC);
         s.connectedUsers.removeIf(u -> Objects.equals(u, waiting));
+        dmconnections.get(0).connectedTo = waitingC;
+        waitingC.connectedTo = dmconnections.get(0);
         dmconnections.add(waitingC);
         Members.add(waiting);
         dmconnections.get(0).send("NOTIFY " + waiting + " has joined your dm, say hi!");
@@ -47,7 +49,8 @@ public class DirectMessage implements Runnable {
     }
 
     public void rejectRequest(Server s) {
-        dmconnections.get(0).send("NOTIFY " + waiting + " rejected ur request, you have rejoined the main message board");
+        dmconnections.get(0).send("NOTIFY " + waiting + " rejected your request, you have rejoined the main message board");
+        dmconnections.get(0).indm = false;
         s.connections.add(dmconnections.get(0));
         s.connectedUsers.add(Members.get(0));
     }
