@@ -18,6 +18,7 @@ public class Server implements Runnable {
     protected ServerSocket server;
     protected Database database;
     protected ArrayList<GroupChat> chatRooms;
+    protected ArrayList<DirectMessage> activeDMs;
 
     public Server() {
         running = true;
@@ -25,6 +26,7 @@ public class Server implements Runnable {
         connectedUsers = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
         chatRooms = new ArrayList<>();
+        activeDMs = new ArrayList<>();
 
         try {
             database = new Database("jdbc:mysql://localhost/cgb21121", "cgb21121", "esh0CaijooQu");
@@ -62,7 +64,7 @@ public class Server implements Runnable {
     }
 
     public void broadcastMessage(String message) {
-        if (chatRooms.isEmpty()) {
+        if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
             for (ClientConnection cc : connections) {
                 if (cc != null) {
                     cc.send(message);
@@ -84,7 +86,22 @@ public class Server implements Runnable {
                     }
                 }
             }
+            boolean indm = false;
             if (!inchat) {
+                for (DirectMessage dm : activeDMs) {
+                    for (String user : dm.getMembers()) {
+                        if (Objects.equals(user, username)) {
+                            indm = true;
+                            for (ClientConnection cc : dm.getConnections()) {
+                                if (cc != null) {
+                                    cc.send(message);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!inchat && !indm) {
                 for (ClientConnection cc : connections) {
                     if (cc != null) {
                         cc.send(message);
@@ -133,8 +150,14 @@ public class Server implements Runnable {
     public void newChat(ClientConnection c, String chatName, String user){
         for (GroupChat gc : chatRooms) {
             gc.getConnections().removeIf(cc -> cc == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage dm : activeDMs) {
+            dm.getConnections().removeIf(cc -> cc == c);
+            dm.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         connections.removeIf(cc -> cc == c);
+        connectedUsers.removeIf(u -> Objects.equals(u, user));
         GroupChat chat = new GroupChat(c, chatName, user);
         chatRooms.add(chat);
     }
@@ -145,10 +168,15 @@ public class Server implements Runnable {
             gc.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         connections.add(c);
+        connectedUsers.add(user);
     }
 
     public ArrayList<GroupChat> getChats(){
         return chatRooms;
+    }
+
+    public ArrayList<DirectMessage> getActiveDMs(){
+        return activeDMs;
     }
 
     public List<String> getConnected(){
@@ -162,4 +190,20 @@ public class Server implements Runnable {
     public List<ClientConnection> getConnections(){
         return connections;
     }
+
+    public void dmSetUp(String user, String userWaiting, ClientConnection c, ClientConnection cc){
+        for (GroupChat gc : chatRooms) {
+            gc.getConnections().removeIf(con -> con == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage dm : activeDMs) {
+            dm.getConnections().removeIf(con -> con == c);
+            dm.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        connections.removeIf(con -> con == c);
+        connectedUsers.removeIf(u -> Objects.equals(u, user));
+        DirectMessage dm = new DirectMessage(user, userWaiting, c, cc);
+        activeDMs.add(dm);
+    }
+
 }

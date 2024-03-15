@@ -93,6 +93,15 @@ public class GUI implements Runnable {
                 clearChat();
                 break;
 
+            case "/yes":
+                client.send("YES ");
+                clearChat();
+                break;
+
+            case "/no":
+                client.send("NO ");
+                break;
+
 
             case "/help":
                 if(args.size() > 1){

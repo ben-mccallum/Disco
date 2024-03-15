@@ -113,6 +113,7 @@ public class ClientConnection implements Runnable {
                     case "DM":
                         String userDM = args.get(0);
                         boolean online = false;
+                        ClientConnection c = null;
                         ClientConnection cc = null;
                         for (GroupChat gc : serve.getChats()){
                             Integer index = 0;
@@ -121,7 +122,10 @@ public class ClientConnection implements Runnable {
                                     online = true;
                                     List<ClientConnection> ccs = gc.getConnections();
                                     cc = ccs.get(index);
-                                    break;
+                                }
+                                if (Objects.equals(user.getUsername(), u)) {
+                                    List<ClientConnection> ccs = gc.getConnections();
+                                    c = ccs.get(index);
                                 }
                                 index ++;
                             }
@@ -133,7 +137,10 @@ public class ClientConnection implements Runnable {
                                     online = true;
                                     List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
                                     cc = ccs.get(index);
-                                    break;
+                                }
+                                if (Objects.equals(user.getUsername(), u)) {
+                                    List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
+                                    c = ccs.get(index);
                                 }
                                 index ++;
                             }
@@ -142,10 +149,43 @@ public class ClientConnection implements Runnable {
                             send("NOTIFY That user is not online!");
                             break;
                         } else {
-                            send("Waiting for User to accept...");
-                            cc.send("NOTIFY " + user.getUsername() + "wants to start a dm with you, /yes to accept, /no to decline");
+                            send("You have entered a dm, waiting for invited user to accept...");
+                            cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
+                            serve.dmSetUp(user.getUsername(), userDM, c, cc);
                         }
                         break;
+
+                    case "YES":
+                        boolean waiting = false;
+                        for (DirectMessage dm : serve.getActiveDMs()) {
+                            if (Objects.equals(user.getUsername(), dm.getWaiting())) {
+                                waiting = true;
+                                dm.acceptRequest(serve);
+                            }
+                        }
+                        if (!waiting){
+                            send("NOTIFY No one has currently requested a dm with you");
+                        }
+                        break;
+
+                    case "NO":
+                        boolean wait = false;
+                        DirectMessage target = null;
+                        for (DirectMessage dm : serve.getActiveDMs()) {
+                            if (Objects.equals(user.getUsername(), dm.getWaiting())) {
+                                wait = true;
+                                target = dm;
+                            }
+                        }
+                        if (!wait){
+                            send("NOTIFY No one has currently requested a dm with you");
+                        } else {
+                            send("NOTIFY Request rejected");
+                            target.rejectRequest(serve);
+                            serve.activeDMs.remove(target);
+                        }
+                        break;
+
 
 
 
