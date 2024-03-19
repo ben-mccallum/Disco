@@ -236,17 +236,29 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "ONLINE":
-                        if (indm) {
-                            break;
-                        }
-
                         List<String> onlineUsers = new ArrayList<>();
-
-                        for (GroupChat gc : serve.chatRooms) {
-                            for (ClientConnection cc : gc.getConnections()) {
-                                onlineUsers.add(cc.user.getUsername());
+                        boolean ingc = false;
+                        if (!indm) {
+                            for (GroupChat gc : serve.chatRooms) {
+                                for (ClientConnection cc : gc.getConnections()) {
+                                    if (Objects.equals(this, cc)){
+                                        ingc = true;
+                                        onlineUsers = gc.getMembers();
+                                        break;
+                                    }
+                                }
                             }
+                            if (!ingc) {
+                                onlineUsers = serve.connectedUsers;
+                            }
+                        } else {
+                            onlineUsers.add(user.getUsername());
+                            onlineUsers.add(connectedTo.user.getUsername());
                         }
+
+
+
+
 
                         send("NOTIFY " + String.join("", (String[]) onlineUsers.toArray()));
 
