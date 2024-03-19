@@ -13,16 +13,20 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable {
     protected boolean running;
     protected List<ClientConnection> connections;
+    protected List<String> connectedUsers;
     protected ExecutorService pool;
     protected ServerSocket server;
     protected Database database;
     protected ArrayList<GroupChat> chatRooms;
+    protected ArrayList<DirectMessage> activeDMs;
 
     public Server() {
         running = true;
         connections = new ArrayList<>();
+        connectedUsers = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
         chatRooms = new ArrayList<>();
+        activeDMs = new ArrayList<>();
 
         try {
             database = new Database("jdbc:mysql://localhost/cgb21121", "cgb21121", "esh0CaijooQu");
@@ -60,7 +64,7 @@ public class Server implements Runnable {
     }
 
     public void broadcastMessage(String message) {
-        if (chatRooms.isEmpty()) {
+        if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
             for (ClientConnection cc : connections) {
                 if (cc != null) {
                     cc.send(message);
@@ -131,21 +135,57 @@ public class Server implements Runnable {
     public void newChat(ClientConnection c, String chatName, String user){
         for (GroupChat gc : chatRooms) {
             gc.getConnections().removeIf(cc -> cc == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage dm : activeDMs) {
+            dm.getConnections().removeIf(cc -> cc == c);
+            dm.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         connections.removeIf(cc -> cc == c);
+        connectedUsers.removeIf(u -> Objects.equals(u, user));
         GroupChat chat = new GroupChat(c, chatName, user);
         chatRooms.add(chat);
     }
 
     public void leaveChat(ClientConnection c, String user){
+        boolean inchat = false;
         for (GroupChat gc : chatRooms) {
+            boolean remove = false;
             gc.getConnections().removeIf(cc -> cc == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+            for (String u : gc.getMembers()) {
+                if(Objects.equals(u, user)){
+                    inchat = true;
+                    remove = true;
+                }
+            }
+            if (remove){
+                gc.getMembers().remove(user);
+            }
         }
-        connections.add(c);
+        if (inchat){
+            connections.add(c);
+            connectedUsers.add(user);
+        }
     }
 
     public ArrayList<GroupChat> getChats(){
         return chatRooms;
     }
+
+    public ArrayList<DirectMessage> getActiveDMs(){
+        return activeDMs;
+    }
+
+    public List<String> getConnected(){
+    return connectedUsers;
+}
+
+    public void addConnectedUser(String User){
+        connectedUsers.add(User);
+    }
+
+    public List<ClientConnection> getConnections(){
+        return connections;
+    }
+
 }

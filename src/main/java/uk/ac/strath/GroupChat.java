@@ -36,8 +36,14 @@ public class GroupChat implements Runnable{
     public void addMember(Server s, ClientConnection cc, String user) {
         for (GroupChat gc : s.getChats()) {
             gc.getConnections().removeIf(c -> c == cc);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage dm : s.getActiveDMs()) {
+            dm.getConnections().removeIf(c -> c == cc);
+            dm.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         s.connections.removeIf(c -> c == cc);
+        s.connectedUsers.removeIf(u -> Objects.equals(u, user));
         Members.add(user);
         gcconnections.add(cc);
     }
