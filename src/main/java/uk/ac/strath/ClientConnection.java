@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.*;
 
+
 public class ClientConnection implements Runnable {
     private Socket client;
     private PrintWriter out;
@@ -103,16 +104,21 @@ public class ClientConnection implements Runnable {
                         if (ChatRooms.isEmpty()) {
                             App.getInstance().getServer().newChat(this, chat, user.getUsername());
                         } else {
-                            boolean chatexists = false;
                             for(GroupChat r: ChatRooms){
+                                boolean inchat = false;
                                 if(r.getID().equals(chat)){
-                                    r.addMember(serve, this, user.getUsername());
-                                    chatexists = true;
+                                    for (String username : r.getMembers()) {
+                                        if (Objects.equals(user.getUsername(), username)) {
+                                            send("NOTIFY You are already in this chat");
+                                            inchat = true;
+                                        }
+                                    }
+                                    if (!inchat){
+                                        r.addMember(serve, this, user.getUsername());
+                                    }
+                                }else{
+                                    App.getInstance().getServer().newChat(this, chat, user.getUsername());
                                 }
-                            }
-                            if (!chatexists) {
-                                //line referring to balls
-                                App.getInstance().getServer().newChat(this, chat, user.getUsername());
                             }
                         }
                         send("NOTIFY Welcome to " + chat);
