@@ -15,7 +15,7 @@ public class PollOnlineUsers implements Runnable {
         while (client.isRunning()) {
             long time = new Date().getTime();
 
-            if (time > lastPoll + 5000) {
+            if (time > lastPoll + 1000) {
                 client.getOut().println("ONLINE");
                 lastPoll = time;
             }
