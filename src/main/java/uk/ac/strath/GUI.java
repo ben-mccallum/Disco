@@ -47,19 +47,15 @@ public class GUI implements Runnable {
     @Override
     public void run() {
         setView("chat");
-
     }
 
     public void showMessage(String message) {
         ViewChat vc = (ViewChat) views.get("chat");
 
         vc.getMessages().setText(vc.getMessages().getText() + message + "\n");
-
     }
 
-
     public void sendMessage(String message) {
-
         LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
         String cmd = args.removeFirst();
 
@@ -102,7 +98,6 @@ public class GUI implements Runnable {
                 client.send("NO ");
                 break;
 
-
             case "/help":
                 if(args.size() > 1){
                     //help lists for specific commands???
@@ -119,7 +114,6 @@ public class GUI implements Runnable {
                 showMessage(" ");
                 return;
 
-
             case "/signup":
                 if(args.size() < 2){
                     showMessage("Please provide a username and a password!");
@@ -128,7 +122,6 @@ public class GUI implements Runnable {
                 client.send("SIGNUP " + args.get(0) + " " + args.get(1));
                 break;
 
-
             case "/logout":
                 client.send("LOGOUT");
                 break;
@@ -136,11 +129,6 @@ public class GUI implements Runnable {
             case "/leave":
                 client.send("LEAVE");
                 clearChat();
-                break;
-
-
-            case "/online":
-                client.send("ONLINE");
                 break;
 
             default:

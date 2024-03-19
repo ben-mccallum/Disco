@@ -10,6 +10,7 @@ public class ViewChat extends View {
     private JTextPane messages;
     private JButton send;
     private JTextField input;
+    private JList onlinePeople;
 
     public ViewChat(GUI gui) {
         super("chat");
@@ -27,6 +28,10 @@ public class ViewChat extends View {
 
     public JTextPane getMessages() {
         return messages;
+    }
+
+    public JList getOnlinePeople() {
+        return onlinePeople;
     }
 
     @Override

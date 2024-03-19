@@ -14,12 +14,15 @@ public class Client implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     private GUI gui;
-    private Thread guiThread;
+    private PollOnlineUsers pollOnlineUsers;
+    private Thread guiThread, pollOnlineThread;
 
     public Client(String ip) {
         running = true;
         gui = new GUI(this);
         guiThread = new Thread(gui);
+        pollOnlineUsers = new PollOnlineUsers(this);
+        pollOnlineThread = new Thread(pollOnlineUsers);
 
         try {
             client = new Socket(ip, App.PORT);
@@ -33,6 +36,7 @@ public class Client implements Runnable {
     @Override
     public void run() {
         guiThread.start();
+        pollOnlineThread.start();
 
         String message;
 
@@ -84,6 +88,10 @@ public class Client implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public PrintWriter getOut() {
+        return out;
     }
 
     public boolean isRunning() {

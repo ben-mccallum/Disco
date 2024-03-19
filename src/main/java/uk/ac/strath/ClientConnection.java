@@ -207,9 +207,6 @@ public class ClientConnection implements Runnable {
                         }
                         break;
 
-
-
-
                     case "LOGOUT":
                         user = null;
                         send("NOTIFY You have been logged out!");
@@ -239,13 +236,19 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "ONLINE":
-                        ArrayList<String> onlineUsers = new ArrayList<>();
-                        for (GroupChat gc : serve.getChats()){
-                            for (String u : gc.getMembers()){
-                                onlineUsers.add(u);
+                        if (indm) {
+                            break;
+                        }
+
+                        List<String> onlineUsers = new ArrayList<>();
+
+                        for (GroupChat gc : serve.chatRooms) {
+                            for (ClientConnection cc : gc.getConnections()) {
+                                onlineUsers.add(cc.user.getUsername());
                             }
                         }
-                        send("NOTIFY Online users: " + onlineUsers);
+
+                        send("NOTIFY " + String.join("", (String[]) onlineUsers.toArray()));
 
                     default:
                         break;
