@@ -7,8 +7,8 @@ import java.util.Objects;
 public class DirectMessage implements Runnable {
     private List<ClientConnection> dmconnections;
     protected List<String> Members;
-    private ClientConnection waitingC;
-    private String waiting;
+    protected ClientConnection waitingC;
+    protected String waiting;
 
     public DirectMessage(String user, String userWaiting, ClientConnection c, ClientConnection cc) {
         dmconnections = new ArrayList<>();

@@ -126,8 +126,8 @@ public class ClientConnection implements Runnable {
 
                     case "DM":
                         String userDM = args.get(0);
-                        if (Objects.equals(userDM, user.getUsername())){
-                            send("NOTIFY You can't start a dm with yourself!");
+                        if (Objects.equals(userDM, user.getUsername()) || indm){
+                            send("NOTIFY You can't start a dm with yourself or when you are in a dm already");
                         } else {
                             boolean online = false;
                             ClientConnection c = null;
@@ -208,6 +208,43 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "LOGOUT":
+                        boolean ing = false;
+                        GroupChat g = null;
+                        if (!indm) {
+                            for (GroupChat gc : serve.chatRooms) {
+                                for (ClientConnection cc : gc.getConnections()) {
+                                    if (Objects.equals(this, cc)){
+                                        ing = true;
+                                        g = gc;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (ing) {
+                                g.getMembers().remove(user.getUsername());
+                                g.getConnections().remove(this);
+                            } else {
+                                serve.connections.remove(this);
+                                serve.connectedUsers.remove(user.getUsername());
+                            }
+                        } else {
+                            send("NOTIFY Goodbye!");
+                            if (activeDM.waiting == null) {
+                                connectedTo.send("NOTIFY The user you were talking to has left this direct message, returning to main chat");
+                                connectedTo.indm = false;
+                                indm = false;
+                                connectedTo.activeDM = null;
+                                serve.connections.add(connectedTo);
+                                serve.connectedUsers.add(activeDM.Members.get(1));
+                                connectedTo.connectedTo = null;
+                                connectedTo = null;
+                                serve.activeDMs.remove(activeDM);
+                                activeDM = null;
+                            }
+                            activeDM.waitingC.send("NOTIFY the user who wished to direct message you has logged out");
+                            serve.activeDMs.remove(activeDM);
+                            activeDM = null;
+                        }
                         user = null;
                         send("NOTIFY You have been logged out!");
                         break;
