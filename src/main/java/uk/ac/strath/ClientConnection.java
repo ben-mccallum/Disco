@@ -41,7 +41,7 @@ public class ClientConnection implements Runnable {
                 LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
                 String op = args.removeFirst();
 
-                if (user == null && !op.equals("IDENTIFY") && !op.equals("SIGNUP")){
+                if (user == null && !op.equals("IDENTIFY") && !op.equals("SIGNUP") && !op.equals("ONLINE")){
                     send("NOTIFY You are not logged in!");
                     continue;
                 }
@@ -208,8 +208,9 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "LOGOUT":
-                        user = null;
                         send("NOTIFY You have been logged out!");
+                        serve.connectedUsers.remove(user.getUsername());
+                        serve.connections.remove(this);
                         break;
 
                     case "LEAVE":
@@ -236,6 +237,9 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "ONLINE":
+                        if (user == null) {
+                            break;
+                        }
                         List<String> onlineUsers = new ArrayList<>();
                         boolean ingc = false;
                         if (!indm) {
