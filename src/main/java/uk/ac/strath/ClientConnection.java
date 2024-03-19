@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.*;
+import javax.swing.*;
+import java.io.File;
 
 
 public class ClientConnection implements Runnable {
@@ -273,6 +275,20 @@ public class ClientConnection implements Runnable {
                         }
 
                         break;
+
+                    case "FILE":
+                        JFileChooser fileChooser = new JFileChooser();
+                        int returnValue = fileChooser.showOpenDialog(null);
+
+                        if (returnValue == JFileChooser.APPROVE_OPTION) {
+                            File selectedFile = fileChooser.getSelectedFile();
+                            send("NOTIFY Selected file: " + selectedFile.getAbsolutePath());
+                        } else {
+                            send("NOTIFY No file selected.");
+                        }
+
+                        break;
+
 
                     case "ONLINE":
                         if (user == null) {
