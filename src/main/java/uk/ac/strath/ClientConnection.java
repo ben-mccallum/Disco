@@ -293,11 +293,7 @@ public class ClientConnection implements Runnable {
                             onlineUsers.add(connectedTo.user.getUsername());
                         }
 
-
-
-
-
-                        send("NOTIFY " + String.join("", (String[]) onlineUsers.toArray()));
+                        send("ONLINE " + String.join(" ", onlineUsers));
 
                     default:
                         break;

@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Vector;
 
 public class GUI implements Runnable {
     private Client client;
@@ -53,6 +54,12 @@ public class GUI implements Runnable {
         ViewChat vc = (ViewChat) views.get("chat");
 
         vc.getMessages().setText(vc.getMessages().getText() + message + "\n");
+    }
+
+    public void setOnlineUsers(String[] users) {
+        ViewChat vc = (ViewChat) views.get("chat");
+
+        vc.getOnlinePeople().setListData(new Vector<String>(Arrays.asList(users)));
     }
 
     public void sendMessage(String message) {
