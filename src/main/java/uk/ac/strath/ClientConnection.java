@@ -41,7 +41,7 @@ public class ClientConnection implements Runnable {
                 LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
                 String op = args.removeFirst();
 
-                if (user == null && !op.equals("IDENTIFY") && !op.equals("SIGNUP")){
+                if (user == null && !op.equals("IDENTIFY") && !op.equals("SIGNUP") && !op.equals("ONLINE")){
                     send("NOTIFY You are not logged in!");
                     continue;
                 }
@@ -126,8 +126,8 @@ public class ClientConnection implements Runnable {
 
                     case "DM":
                         String userDM = args.get(0);
-                        if (Objects.equals(userDM, user.getUsername())){
-                            send("NOTIFY You can't start a dm with yourself!");
+                        if (Objects.equals(userDM, user.getUsername()) || indm){
+                            send("NOTIFY You can't start a dm with yourself or when you are in a dm already");
                         } else {
                             boolean online = false;
                             ClientConnection c = null;
@@ -207,12 +207,48 @@ public class ClientConnection implements Runnable {
                         }
                         break;
 
-
-
-
                     case "LOGOUT":
+                        boolean ing = false;
+                        GroupChat g = null;
+                        if (!indm) {
+                            for (GroupChat gc : serve.chatRooms) {
+                                for (ClientConnection cc : gc.getConnections()) {
+                                    if (Objects.equals(this, cc)){
+                                        ing = true;
+                                        g = gc;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (ing) {
+                                g.getMembers().remove(user.getUsername());
+                                g.getConnections().remove(this);
+                            } else {
+                                serve.connections.remove(this);
+                                serve.connectedUsers.remove(user.getUsername());
+                            }
+                        } else {
+                            send("NOTIFY Goodbye!");
+                            if (activeDM.waiting == null) {
+                                connectedTo.send("NOTIFY The user you were talking to has left this direct message, returning to main chat");
+                                connectedTo.indm = false;
+                                indm = false;
+                                connectedTo.activeDM = null;
+                                serve.connections.add(connectedTo);
+                                serve.connectedUsers.add(activeDM.Members.get(1));
+                                connectedTo.connectedTo = null;
+                                connectedTo = null;
+                                serve.activeDMs.remove(activeDM);
+                                activeDM = null;
+                            }
+                            activeDM.waitingC.send("NOTIFY the user who wished to direct message you has logged out");
+                            serve.activeDMs.remove(activeDM);
+                            activeDM = null;
+                        }
                         user = null;
                         send("NOTIFY You have been logged out!");
+                        serve.connectedUsers.remove(user.getUsername());
+                        serve.connections.remove(this);
                         break;
 
                     case "LEAVE":
@@ -239,13 +275,30 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "ONLINE":
-                        ArrayList<String> onlineUsers = new ArrayList<>();
-                        for (GroupChat gc : serve.getChats()){
-                            for (String u : gc.getMembers()){
-                                onlineUsers.add(u);
-                            }
+                        if (user == null) {
+                            break;
                         }
-                        send("NOTIFY Online users: " + onlineUsers);
+                        List<String> onlineUsers = new ArrayList<>();
+                        boolean ingc = false;
+                        if (!indm) {
+                            for (GroupChat gc : serve.chatRooms) {
+                                for (ClientConnection cc : gc.getConnections()) {
+                                    if (Objects.equals(this, cc)){
+                                        ingc = true;
+                                        onlineUsers = gc.getMembers();
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!ingc) {
+                                onlineUsers = serve.connectedUsers;
+                            }
+                        } else {
+                            onlineUsers.add(user.getUsername());
+                            onlineUsers.add(connectedTo.user.getUsername());
+                        }
+
+                        send("ONLINE " + String.join(" ", onlineUsers));
 
                     default:
                         break;
