@@ -28,16 +28,7 @@ public class DirectMessage implements Runnable {
     }
 
     public void acceptRequest(Server s) {
-        for (GroupChat gc : s.getChats()) {
-            gc.getConnections().removeIf(c -> c == waitingC);
-            gc.getMembers().removeIf(u -> Objects.equals(u, waiting));
-        }
-        for (DirectMessage dm : s.getActiveDMs()) {
-            dm.getConnections().removeIf(c -> c == waitingC);
-            dm.getMembers().removeIf(u -> Objects.equals(u, waiting));
-        }
-        s.connections.removeIf(c -> c == waitingC);
-        s.connectedUsers.removeIf(u -> Objects.equals(u, waiting));
+        s.removeConnections(waitingC, waiting);
         dmconnections.get(0).connectedTo = waitingC;
         waitingC.connectedTo = dmconnections.get(0);
         dmconnections.add(waitingC);

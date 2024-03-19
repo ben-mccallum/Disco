@@ -133,16 +133,7 @@ public class Server implements Runnable {
     }
 
     public void newChat(ClientConnection c, String chatName, String user){
-        for (GroupChat gc : chatRooms) {
-            gc.getConnections().removeIf(cc -> cc == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        for (DirectMessage dm : activeDMs) {
-            dm.getConnections().removeIf(cc -> cc == c);
-            dm.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        connections.removeIf(cc -> cc == c);
-        connectedUsers.removeIf(u -> Objects.equals(u, user));
+        removeConnections(c, user);
         GroupChat chat = new GroupChat(c, chatName, user);
         chatRooms.add(chat);
     }
@@ -186,6 +177,19 @@ public class Server implements Runnable {
 
     public List<ClientConnection> getConnections(){
         return connections;
+    }
+
+    public void removeConnections(ClientConnection c, String user){
+        for (GroupChat gc : getChats()) {
+            gc.getConnections().removeIf(cc -> cc == c);
+            gc.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        for (DirectMessage dm : getActiveDMs()) {
+            dm.getConnections().removeIf(cc -> cc == c);
+            dm.getMembers().removeIf(u -> Objects.equals(u, user));
+        }
+        connections.removeIf(cc -> cc == c);
+        connectedUsers.removeIf(u -> Objects.equals(u, user));
     }
 
 }

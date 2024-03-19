@@ -274,16 +274,7 @@ public class ClientConnection implements Runnable {
     }
 
     public void dmSetUp(String user, String userWaiting, ClientConnection c, ClientConnection cc){
-        for (GroupChat gc : serve.chatRooms) {
-            gc.getConnections().removeIf(con -> con == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        for (DirectMessage d : serve.activeDMs) {
-            d.getConnections().removeIf(con -> con == c);
-            d.getMembers().removeIf(u -> Objects.equals(u, user));
-        }
-        serve.connections.removeIf(con -> con == c);
-        serve.connectedUsers.removeIf(u -> Objects.equals(u, user));
+        serve.removeConnections(c, user);
         activeDM = new DirectMessage(user, userWaiting, c, cc);
         serve.activeDMs.add(activeDM);
     }
