@@ -19,6 +19,8 @@ public class Server implements Runnable {
     protected Database database;
     protected ArrayList<GroupChat> chatRooms;
     protected ArrayList<DirectMessage> activeDMs;
+    private Thread timeThread;
+    protected timeFinder tF;
 
     public Server() {
         running = true;
@@ -65,11 +67,7 @@ public class Server implements Runnable {
 
     public void broadcastMessage(String message) {
         if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
-            for (ClientConnection cc : connections) {
-                if (cc != null) {
-                    cc.send(message);
-                }
-            }
+            broadcast(message);
         } else {
             String[] parts = message.split(" ");
             String username = parts[1];
@@ -80,25 +78,26 @@ public class Server implements Runnable {
                         inchat = true;
                         for (ClientConnection cc : gc.getConnections()) {
                             if (cc != null) {
-                                cc.send(message);
+                                broadcast(message);
                             }
                         }
                     }
                 }
             }
             if (!inchat) {
-                for (ClientConnection cc : connections) {
-                    if (cc != null) {
-                        cc.send(message);
-                    }
-                }
+                broadcast(message);
             }
         }
     }
 
-    public void broadcast(String message) {
-        for (ClientConnection cc : connections) {
+    private void broadcast(String message) {
+        for (ClientConnection cc : connections){
             if (cc != null) {
+                timeFinder tF = new timeFinder(message);
+                timeThread = new Thread(tF);
+                timeThread.start();
+                message = tF.getMsg();
+                System.out.println(message);
                 cc.send(message);
             }
         }

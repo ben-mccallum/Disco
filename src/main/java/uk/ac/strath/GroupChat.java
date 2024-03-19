@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GroupChat implements Runnable{
+public class GroupChat{
     private List<ClientConnection> gcconnections;
     private List<String> Members;
     private String ID;
@@ -15,10 +15,6 @@ public class GroupChat implements Runnable{
         Members = new ArrayList<>();
         Members.add(user);
         ID = chatname;
-    }
-
-    @Override
-    public void run(){
     }
 
     public String getID(){

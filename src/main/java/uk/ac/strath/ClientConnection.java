@@ -14,7 +14,7 @@ public class ClientConnection implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     private User user;
-    private Server serve;
+    private final Server serve;
     protected boolean indm;
     protected ClientConnection connectedTo;
     protected DirectMessage activeDM;
@@ -98,11 +98,11 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "CHANNEL":
-                        serve.broadcast("CHANNEL " +  String.join(" ", args));
-                        String chat = args.get(0);
-                        ArrayList<GroupChat> ChatRooms = App.getInstance().getServer().getChats();
+                        //serve.broadcast("CHANNEL " +  String.join(" ", args));
+                        String chat = args.getFirst();
+                        ArrayList<GroupChat> ChatRooms = serve.getChats();
                         if (ChatRooms.isEmpty()) {
-                            App.getInstance().getServer().newChat(this, chat, user.getUsername());
+                            serve.newChat(this, chat, user.getUsername());
                         } else {
                             for(GroupChat r: ChatRooms){
                                 boolean inchat = false;
@@ -117,15 +117,14 @@ public class ClientConnection implements Runnable {
                                         r.addMember(serve, this, user.getUsername());
                                     }
                                 }else{
-                                    App.getInstance().getServer().newChat(this, chat, user.getUsername());
+                                    serve.newChat(this, chat, user.getUsername());
                                 }
                             }
                         }
-                        send("NOTIFY Welcome to " + chat);
                         break;
 
                     case "DM":
-                        String userDM = args.get(0);
+                        String userDM = args.getFirst();
                         if (Objects.equals(userDM, user.getUsername()) || indm){
                             send("NOTIFY You can't start a dm with yourself or when you are in a dm already");
                         } else {
@@ -133,7 +132,7 @@ public class ClientConnection implements Runnable {
                             ClientConnection c = null;
                             ClientConnection cc = null;
                             for (GroupChat gc : serve.getChats()) {
-                                Integer index = 0;
+                                int index = 0;
                                 for (String u : gc.getMembers()) {
                                     if (Objects.equals(userDM, u)) {
                                         online = true;
@@ -148,7 +147,7 @@ public class ClientConnection implements Runnable {
                                 }
                             }
                             if (!online) {
-                                Integer index = 0;
+                                int index = 0;
                                 for (String u : serve.getConnected()) {
                                     if (Objects.equals(userDM, u)) {
                                         online = true;
@@ -247,7 +246,7 @@ public class ClientConnection implements Runnable {
                         }
                         user = null;
                         send("NOTIFY You have been logged out!");
-                        serve.connectedUsers.remove(user.getUsername());
+                        //serve.connectedUsers.remove(user.getUsername());
                         serve.connections.remove(this);
                         break;
 
