@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.util.*;
 import javax.swing.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
 
 
 public class ClientConnection implements Runnable {
@@ -20,6 +23,7 @@ public class ClientConnection implements Runnable {
     protected boolean indm;
     protected ClientConnection connectedTo;
     protected DirectMessage activeDM;
+    private static final int FILE_TRANSFER_PORT = 12345;
 
     public ClientConnection(Socket client, Server s) {
         this.client = client;
@@ -277,18 +281,60 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "FILE":
-                        JFileChooser fileChooser = new JFileChooser();
-                        int returnValue = fileChooser.showOpenDialog(null);
+                        if (indm) {
+                            send("NOTIFY Initiating file transfer...");
 
-                        if (returnValue == JFileChooser.APPROVE_OPTION) {
-                            File selectedFile = fileChooser.getSelectedFile();
-                            send("NOTIFY Selected file: " + selectedFile.getAbsolutePath());
+                            try {
+                                JFileChooser fileChooser = new JFileChooser();
+                                int returnValue = fileChooser.showOpenDialog(null);
+
+                                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                                    File selectedFile = fileChooser.getSelectedFile();
+                                    send("NOTIFY Selected file: " + selectedFile.getAbsolutePath());
+
+                                    // Read file contents into byte array
+                                    byte[] fileData = readFile(selectedFile);
+
+                                    // Convert byte array to base64 encoded string
+                                    String fileDataString = Base64.getEncoder().encodeToString(fileData);
+
+                                    // Send file data as text
+                                    connectedTo.send("NOTIFY Starting file transfer");
+                                    connectedTo.send("NOTIFY" + fileDataString);
+                                    connectedTo.send("NOTIFY File transfer ended");
+
+                                } else {
+                                    send("NOTIFY No file selected.");
+                                }
+                            } catch (IOException e) {
+                                send("NOTIFY Error occurred during file transfer: " + e.getMessage());
+                            }
                         } else {
-                            send("NOTIFY No file selected.");
+                            send("NOTIFY You must be in a DM to send a file.");
+                        }
+                        break;
+
+                    case "FILE_TRANSFER_START":
+                        try {
+                            send("NOTIFY IS THISBFUCKING WORKING");
+                            // Create FileOutputStream to write the received file
+                            FileOutputStream fileOutputStream = new FileOutputStream("received_file.txt");
+                            send(args.get(0));
+
+                            // Read from the socket input stream and write to the file
+                            byte[] buffer = new byte[1024];
+                            int bytesRead;
+                            while ((bytesRead = in.read()) != -1) {
+                                fileOutputStream.write(buffer, 0, bytesRead);
+                            }
+
+                            // Close the FileOutputStream after file transfer
+                            fileOutputStream.close();
+                        } catch (IOException e) {
+                            send("NOTIFY Error occurred during file transfer: ");
                         }
 
                         break;
-
 
                     case "ONLINE":
                         if (user == null) {
@@ -311,7 +357,9 @@ public class ClientConnection implements Runnable {
                             }
                         } else {
                             onlineUsers.add(user.getUsername());
-                            onlineUsers.add(connectedTo.user.getUsername());
+                            if (activeDM.waiting == null){
+                                onlineUsers.add(connectedTo.user.getUsername());
+                            }
                         }
 
                         send("ONLINE " + String.join(" ", onlineUsers));
@@ -346,5 +394,13 @@ public class ClientConnection implements Runnable {
         serve.removeConnections(c, user);
         activeDM = new DirectMessage(user, userWaiting, c, cc);
         serve.activeDMs.add(activeDM);
+    }
+
+    private byte[] readFile(File file) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(file);
+        byte[] fileData = new byte[(int) file.length()];
+        fileInputStream.read(fileData);
+        fileInputStream.close();
+        return fileData;
     }
 }
