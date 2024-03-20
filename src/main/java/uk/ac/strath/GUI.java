@@ -62,6 +62,13 @@ public class GUI implements Runnable {
         vc.getOnlinePeople().setListData(new Vector<String>(Arrays.asList(users)));
     }
 
+    public void setCurrentTime(String time) {
+        SwingUtilities.invokeLater(() -> {
+            ViewChat vc = (ViewChat) views.get("chat");
+            vc.getCurrentTime().setText(time);
+        });
+    }
+
     public void sendMessage(String message) {
         LinkedList<String> args = new LinkedList<>(Arrays.asList(message.split("\\s+")));
         String cmd = args.removeFirst();

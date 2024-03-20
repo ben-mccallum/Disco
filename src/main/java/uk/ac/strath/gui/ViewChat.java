@@ -13,6 +13,7 @@ public class ViewChat extends View {
     private JButton send;
     private JTextField input;
     private JList onlinePeople;
+    private JTextPane currentTime;
 
     public ViewChat(GUI gui) {
         super("chat");
@@ -36,6 +37,10 @@ public class ViewChat extends View {
         return onlinePeople;
     }
 
+    public JTextPane getCurrentTime() {
+        return currentTime;
+    }
+
     @Override
     public JPanel getMainPanel() {
         return mainPanel;
@@ -57,17 +62,21 @@ public class ViewChat extends View {
      */
     private void $$$setupUI$$$() {
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayoutManager(2, 3, new Insets(4, 4, 4, 4), -1, -1));
+        mainPanel.setLayout(new GridLayoutManager(4, 3, new Insets(4, 4, 4, 4), -1, -1));
+        mainPanel.setAutoscrolls(false);
         messages = new JTextPane();
         messages.setEditable(false);
-        mainPanel.add(messages, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        mainPanel.add(messages, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         send = new JButton();
         send.setText("Send");
-        mainPanel.add(send, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        mainPanel.add(send, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         input = new JTextField();
-        mainPanel.add(input, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        mainPanel.add(input, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         onlinePeople = new JList();
-        mainPanel.add(onlinePeople, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        mainPanel.add(onlinePeople, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        currentTime = new JTextPane();
+        currentTime.setEditable(false);
+        mainPanel.add(currentTime, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 10), null, 0, false));
     }
 
     /**
@@ -77,4 +86,7 @@ public class ViewChat extends View {
         return mainPanel;
     }
 
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
 }
