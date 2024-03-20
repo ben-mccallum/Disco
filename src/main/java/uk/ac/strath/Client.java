@@ -63,7 +63,7 @@ public class Client implements Runnable {
                         break;
 
                     case "ONLINE":
-                        gui.setOnlineUsers(args.toArray(new String[args.size()]));
+                        gui.setOnlineUsers(args.toArray(new String[0]));
                         break;
 
                     default:

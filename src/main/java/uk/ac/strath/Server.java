@@ -94,8 +94,6 @@ public class Server implements Runnable {
         for (ClientConnection cc : connections){
             if (cc != null) {
                 timeFinder tF = new timeFinder(message);
-                timeThread = new Thread(tF);
-                timeThread.start();
                 message = tF.getMsg();
                 System.out.println(message);
                 cc.send(message);
