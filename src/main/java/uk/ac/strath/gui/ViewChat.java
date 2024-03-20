@@ -27,6 +27,25 @@ public class ViewChat extends View {
             gui.sendMessage(input.getText());
             input.setText("");
         });
+
+        onlinePeople.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof String) {
+                    String text = value.toString();
+
+                    if (text.charAt(0) == '!') {
+                        setForeground(Color.YELLOW);
+                        setText(text.substring(1));
+                    } else {
+                        setForeground(Color.GREEN);
+                        setText(text);
+                    }
+                }
+
+                return this;
+            }
+        });
     }
 
     public JTextPane getMessages() {

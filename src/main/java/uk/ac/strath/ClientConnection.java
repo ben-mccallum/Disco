@@ -72,6 +72,8 @@ public class ClientConnection implements Runnable {
 
                     case "MESSAGE":
                         if (!args.isEmpty()) {
+                            serve.getIdleTime().setLastMessage(user.getUsername(), new Date().getTime());
+
                             if (!indm) {
                                 serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                             } else {
@@ -298,7 +300,13 @@ public class ClientConnection implements Runnable {
                             onlineUsers.add(connectedTo.user.getUsername());
                         }
 
-                        send("ONLINE " + String.join(" ", onlineUsers));
+                        List<String> newOnlineUsers = new ArrayList<>();
+
+                        for (String i : onlineUsers) {
+                            newOnlineUsers.add(serve.getIdleTime().isIdle(i) ? ("!" + i) : i);
+                        }
+
+                        send("ONLINE " + String.join(" ", newOnlineUsers));
 
                     default:
                         break;
