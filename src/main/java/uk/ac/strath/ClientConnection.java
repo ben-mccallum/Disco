@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.*;
 
 
 
@@ -172,7 +173,7 @@ public class ClientConnection implements Runnable {
                                 send("NOTIFY That user is not online!");
                                 break;
                             } else {
-                                send("You have entered a dm, waiting for invited user to accept...");
+                                send("NOTIFY You have entered a dm, waiting for invited user to accept...");
                                 indm = true;
                                 cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
                                 dmSetUp(user.getUsername(), userDM, c, cc);
@@ -283,7 +284,6 @@ public class ClientConnection implements Runnable {
                     case "FILE":
                         if (indm) {
                             send("NOTIFY Initiating file transfer...");
-
                             try {
                                 JFileChooser fileChooser = new JFileChooser();
                                 int returnValue = fileChooser.showOpenDialog(null);
@@ -292,16 +292,13 @@ public class ClientConnection implements Runnable {
                                     File selectedFile = fileChooser.getSelectedFile();
                                     send("NOTIFY Selected file: " + selectedFile.getAbsolutePath());
 
-                                    // Read file contents into byte array
-                                    byte[] fileData = readFile(selectedFile);
+                                    FileInputStream fileInputStream = new FileInputStream(selectedFile.getAbsolutePath());
 
-                                    // Convert byte array to base64 encoded string
-                                    String fileDataString = Base64.getEncoder().encodeToString(fileData);
+                                    String fileName = selectedFile.getName();
 
-                                    // Send file data as text
-                                    connectedTo.send("NOTIFY Starting file transfer");
-                                    connectedTo.send("NOTIFY" + fileDataString);
-                                    connectedTo.send("NOTIFY File transfer ended");
+                                    byte[] fileContentBytes = new byte[(int) selectedFile.length()];
+                                    fileInputStream.read(fileContentBytes);
+                                    connectedTo.mynuts(fileContentBytes, fileName);
 
                                 } else {
                                     send("NOTIFY No file selected.");
@@ -312,28 +309,6 @@ public class ClientConnection implements Runnable {
                         } else {
                             send("NOTIFY You must be in a DM to send a file.");
                         }
-                        break;
-
-                    case "FILE_TRANSFER_START":
-                        try {
-                            send("NOTIFY IS THISBFUCKING WORKING");
-                            // Create FileOutputStream to write the received file
-                            FileOutputStream fileOutputStream = new FileOutputStream("received_file.txt");
-                            send(args.get(0));
-
-                            // Read from the socket input stream and write to the file
-                            byte[] buffer = new byte[1024];
-                            int bytesRead;
-                            while ((bytesRead = in.read()) != -1) {
-                                fileOutputStream.write(buffer, 0, bytesRead);
-                            }
-
-                            // Close the FileOutputStream after file transfer
-                            fileOutputStream.close();
-                        } catch (IOException e) {
-                            send("NOTIFY Error occurred during file transfer: ");
-                        }
-
                         break;
 
                     case "ONLINE":
@@ -396,11 +371,15 @@ public class ClientConnection implements Runnable {
         serve.activeDMs.add(activeDM);
     }
 
-    private byte[] readFile(File file) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] fileData = new byte[(int) file.length()];
-        fileInputStream.read(fileData);
-        fileInputStream.close();
-        return fileData;
+    public void mynuts(byte[] data, String name){
+        String downloadFolderPath = System.getProperty("user.home") + File.separator + "Downloads";
+        String filePath = downloadFolderPath + File.separator + name;
+        try (FileOutputStream stream = new FileOutputStream(filePath)) {
+            stream.write(data);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
