@@ -17,6 +17,8 @@ public class Server implements Runnable {
     protected ExecutorService pool;
     protected ServerSocket server;
     protected Database database;
+    protected IdleTime idleTime;
+    protected Thread idleTimeThread;
     protected ArrayList<GroupChat> chatRooms;
     protected ArrayList<DirectMessage> activeDMs;
     private Thread timeThread;
@@ -27,6 +29,8 @@ public class Server implements Runnable {
         connections = new ArrayList<>();
         connectedUsers = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
+        idleTime = new IdleTime(this);
+        idleTimeThread = new Thread(idleTime);
         chatRooms = new ArrayList<>();
         activeDMs = new ArrayList<>();
 
@@ -45,6 +49,7 @@ public class Server implements Runnable {
     @Override
     public void run() {
         if(running){
+            idleTimeThread.start();
             System.out.println("Server started and awaiting connections.");
         }else{
             stop();
@@ -192,4 +197,7 @@ public class Server implements Runnable {
         connectedUsers.removeIf(u -> Objects.equals(u, user));
     }
 
+    public IdleTime getIdleTime() {
+        return idleTime;
+    }
 }

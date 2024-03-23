@@ -54,6 +54,7 @@ public class GUI implements Runnable {
         ViewChat vc = (ViewChat) views.get("chat");
 
         vc.getMessages().setText(vc.getMessages().getText() + message + "\n");
+        vc.getScrollPane().getVerticalScrollBar().setValue(vc.getScrollPane().getVerticalScrollBar().getMaximum());
     }
 
     public void setOnlineUsers(String[] users) {
