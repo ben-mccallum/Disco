@@ -48,10 +48,10 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        if(running){
+        if (running) {
             idleTimeThread.start();
             System.out.println("Server started and awaiting connections.");
-        }else{
+        } else {
             stop();
             return;
         }
@@ -74,7 +74,11 @@ public class Server implements Runnable {
         if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
             timeFinder tF = new timeFinder(message);
             message = tF.getMsg();
-            broadcast(message);
+            for (ClientConnection cc : connections) {
+                if (cc != null) {
+                    cc.send(message);
+                }
+            }
         } else {
             String[] parts = message.split(" ");
             String username = parts[1];
@@ -83,11 +87,11 @@ public class Server implements Runnable {
                 for (String user : gc.getMembers()) {
                     if (Objects.equals(user, username)) {
                         inchat = true;
+                        timeFinder tF = new timeFinder(message);
+                        message = tF.getMsg();
                         for (ClientConnection cc : gc.getConnections()) {
                             if (cc != null) {
-                                timeFinder tF = new timeFinder(message);
-                                message = tF.getMsg();
-                                broadcast(message);
+                                cc.send(message);
                             }
                         }
                     }
@@ -96,9 +100,14 @@ public class Server implements Runnable {
             if (!inchat) {
                 timeFinder tF = new timeFinder(message);
                 message = tF.getMsg();
-                broadcast(message);
+                for (ClientConnection cc : connections) {
+                    if (cc != null) {
+                        cc.send(message);
+                    }
+                }
             }
         }
+
     }
 
     private void broadcast(String message) {

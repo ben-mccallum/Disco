@@ -123,6 +123,7 @@ public class ClientConnection implements Runnable {
                                 }
                             }
                         }
+                        send("NOTIFY Welcome to chat " + chat);
                         break;
 
                     case "DM":
