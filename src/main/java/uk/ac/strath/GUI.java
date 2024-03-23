@@ -4,6 +4,8 @@ import uk.ac.strath.gui.View;
 import uk.ac.strath.gui.ViewChat;
 
 import javax.swing.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +24,21 @@ public class GUI implements Runnable {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         addView(new ViewChat(this));
+
+        // This is here to show why we need it in a thread  - it will block the GUI from loading completely lol
+            while (true) {
+                LocalDateTime currentTime = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedTime = currentTime.format(formatter);
+                setCurrentTime(formattedTime);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
     }
 
     public void addView(View v) {
@@ -60,7 +77,7 @@ public class GUI implements Runnable {
     public void setOnlineUsers(String[] users) {
         ViewChat vc = (ViewChat) views.get("chat");
 
-        vc.getOnlinePeople().setListData(new Vector<String>(Arrays.asList(users)));
+        vc.getOnlinePeople().setListData(new Vector<>(Arrays.asList(users)));
     }
 
     public void setCurrentTime(String time) {
