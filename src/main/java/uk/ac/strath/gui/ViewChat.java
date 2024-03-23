@@ -34,15 +34,17 @@ public class ViewChat extends View {
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value instanceof String) {
                     String text = value.toString();
-
+                    setBackground(Color.decode("#36393e"));
                     if (text.charAt(0) == '!') {
                         setForeground(Color.decode("#ff5733"));
+
                         setText(text.substring(1));
                     } else {
                         setForeground(Color.decode("#02c30f"));
                         setText(text);
                     }
                 }
+
 
                 return this;
             }
@@ -88,21 +90,44 @@ public class ViewChat extends View {
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayoutManager(4, 3, new Insets(4, 4, 4, 4), -1, -1));
         mainPanel.setAutoscrolls(false);
+        mainPanel.setBackground(new Color(-14802652));
+        mainPanel.setEnabled(false);
+        mainPanel.setForeground(new Color(-14802652));
         send = new JButton();
+        send.setBackground(new Color(-14802652));
+        send.setEnabled(true);
+        send.setForeground(new Color(-9270822));
         send.setText("Send");
         mainPanel.add(send, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         input = new JTextField();
+        input.setBackground(new Color(-13158343));
+        input.setCaretColor(new Color(-9270822));
+        input.setForeground(new Color(-1));
+        input.setSelectedTextColor(new Color(-9270822));
+        input.setSelectionColor(new Color(-14802652));
+        input.setText("");
         mainPanel.add(input, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         onlinePeople = new JList();
+        onlinePeople.setBackground(new Color(-13158343));
+        onlinePeople.setForeground(new Color(-9270822));
+        onlinePeople.setLayoutOrientation(1);
+        onlinePeople.setSelectionBackground(new Color(-9270822));
+        onlinePeople.setSelectionForeground(new Color(-9270822));
+        onlinePeople.setSelectionMode(2);
         mainPanel.add(onlinePeople, new GridConstraints(1, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         currentTime = new JTextPane();
+        currentTime.setBackground(new Color(-9270822));
         currentTime.setEditable(false);
         currentTime.setEnabled(true);
+        currentTime.setForeground(new Color(-14802652));
         mainPanel.add(currentTime, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 10), null, 0, false));
         scrollPan = new JScrollPane();
         mainPanel.add(scrollPan, new GridConstraints(1, 0, 2, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         messages = new JTextPane();
+        messages.setBackground(new Color(-13158343));
         messages.setEditable(false);
+        messages.setForeground(new Color(-1));
+        messages.setText("");
         scrollPan.setViewportView(messages);
     }
 
