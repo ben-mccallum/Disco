@@ -9,7 +9,6 @@ public class timeFinder implements Runnable{
 
     public timeFinder(String inp){
         this.content = inp;
-        System.out.println("Constructor called.");
         this.runner = new Thread(this);
         this.runner.start();
     }
@@ -24,7 +23,7 @@ public class timeFinder implements Runnable{
     public String getMsg(){
         //Remove while loop to demo unsafe thread
         while(runner.isAlive()){
-            System.out.println("Waiting...");
+            continue;
         }
         return content;
     }

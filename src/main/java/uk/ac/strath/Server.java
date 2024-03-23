@@ -67,6 +67,8 @@ public class Server implements Runnable {
 
     public void broadcastMessage(String message) {
         if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
+            timeFinder tF = new timeFinder(message);
+            message = tF.getMsg();
             broadcast(message);
         } else {
             String[] parts = message.split(" ");
@@ -78,6 +80,8 @@ public class Server implements Runnable {
                         inchat = true;
                         for (ClientConnection cc : gc.getConnections()) {
                             if (cc != null) {
+                                timeFinder tF = new timeFinder(message);
+                                message = tF.getMsg();
                                 broadcast(message);
                             }
                         }
@@ -85,6 +89,8 @@ public class Server implements Runnable {
                 }
             }
             if (!inchat) {
+                timeFinder tF = new timeFinder(message);
+                message = tF.getMsg();
                 broadcast(message);
             }
         }
@@ -93,9 +99,6 @@ public class Server implements Runnable {
     private void broadcast(String message) {
         for (ClientConnection cc : connections){
             if (cc != null) {
-                timeFinder tF = new timeFinder(message);
-                message = tF.getMsg();
-                System.out.println(message);
                 cc.send(message);
             }
         }
