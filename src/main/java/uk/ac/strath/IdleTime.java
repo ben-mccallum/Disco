@@ -21,7 +21,9 @@ public class IdleTime implements Runnable{
         while(server.isRunning()){
             long time = new Date().getTime();
 
-            for (Entry<String, Long> i : lastMessages.entrySet()) {
+            Map<String, Long> copy = new HashMap<>(lastMessages);
+
+            for (Entry<String, Long> i : copy.entrySet()) {
                 idleUsers.put(i.getKey(), time > i.getValue() + 10000);
             }
         }
@@ -32,6 +34,6 @@ public class IdleTime implements Runnable{
     }
 
     public boolean isIdle(String user) {
-        return idleUsers.containsKey(user) ? idleUsers.get(user) : false;
+        return idleUsers.containsKey(user) ? idleUsers.get(user) : true;
     }
 }
