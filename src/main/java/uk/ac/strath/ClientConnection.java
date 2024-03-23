@@ -311,6 +311,8 @@ public class ClientConnection implements Runnable {
                     default:
                         break;
                 }
+
+                serve.getIdleTime().updateUsers();
             }
         } catch (IOException | SQLException e) {
             stop();

@@ -29,6 +29,14 @@ public class IdleTime implements Runnable{
         }
     }
 
+    public void updateUsers() {
+        long time = new Date().getTime();
+
+        for (Entry<String, Long> i : lastMessages.entrySet()) {
+            idleUsers.put(i.getKey(), time > i.getValue() + 10000);
+        }
+    }
+
     public void setLastMessage(String user, long time) {
         lastMessages.put(user, time);
     }

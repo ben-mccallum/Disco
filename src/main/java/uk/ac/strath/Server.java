@@ -49,7 +49,7 @@ public class Server implements Runnable {
     @Override
     public void run() {
         if (running) {
-            idleTimeThread.start();
+            //idleTimeThread.start();
             System.out.println("Server started and awaiting connections.");
         } else {
             stop();
