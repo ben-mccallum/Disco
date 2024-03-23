@@ -29,21 +29,21 @@ public class DirectMessage implements Runnable {
 
     public void acceptRequest(Server s) {
         s.removeConnections(waitingC, waiting);
-        dmconnections.get(0).connectedTo = waitingC;
-        waitingC.connectedTo = dmconnections.get(0);
+        dmconnections.getFirst().connectedTo = waitingC;
+        waitingC.connectedTo = dmconnections.getFirst();
         dmconnections.add(waitingC);
         Members.add(waiting);
-        dmconnections.get(0).send("NOTIFY " + waiting + " has joined your dm, say hi!");
-        waitingC.send("NOTIFY you have joined a dm with " + Members.get(0));
+        dmconnections.getFirst().send("NOTIFY " + waiting + " has joined your dm, say hi!");
+        waitingC.send("NOTIFY you have joined a dm with " + Members.getFirst());
         waiting = null;
         waitingC = null;
     }
 
     public void rejectRequest(Server s) {
-        dmconnections.get(0).send("NOTIFY " + waiting + " rejected your request, you have rejoined the main message board");
-        dmconnections.get(0).indm = false;
-        s.connections.add(dmconnections.get(0));
-        s.connectedUsers.add(Members.get(0));
+        dmconnections.getFirst().send("NOTIFY " + waiting + " rejected your request, you have rejoined the main message board");
+        dmconnections.getFirst().indm = false;
+        s.connections.add(dmconnections.getFirst());
+        s.connectedUsers.add(Members.getFirst());
     }
 
     public List<String> getMembers() {
