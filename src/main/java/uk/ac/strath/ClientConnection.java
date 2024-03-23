@@ -308,6 +308,8 @@ public class ClientConnection implements Runnable {
 
                         send("ONLINE " + String.join(" ", newOnlineUsers));
 
+
+
                     default:
                         break;
                 }
@@ -329,6 +331,7 @@ public class ClientConnection implements Runnable {
             if (client.isConnected()) {
                 client.close();
             }
+            serve.removeConnections(this, user.getUsername());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
