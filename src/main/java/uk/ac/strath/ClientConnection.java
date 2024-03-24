@@ -298,7 +298,9 @@ public class ClientConnection implements Runnable {
 
                                     byte[] fileContentBytes = new byte[(int) selectedFile.length()];
                                     fileInputStream.read(fileContentBytes);
-                                    connectedTo.mynuts(fileContentBytes, fileName);
+
+                                    connectedTo.displayImage(fileContentBytes);
+
 
                                 } else {
                                     send("NOTIFY No file selected.");
@@ -371,9 +373,9 @@ public class ClientConnection implements Runnable {
         serve.activeDMs.add(activeDM);
     }
 
-    public void mynuts(byte[] data, String name){
+    public void mynuts(byte[] data){
         String downloadFolderPath = System.getProperty("user.home") + File.separator + "Downloads";
-        String filePath = downloadFolderPath + File.separator + name;
+        String filePath = downloadFolderPath + File.separator + "hehehehe.jpg";
         try (FileOutputStream stream = new FileOutputStream(filePath)) {
             stream.write(data);
         } catch (FileNotFoundException e) {
@@ -381,5 +383,9 @@ public class ClientConnection implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void displayImage(byte[] data){
+        SwingUtilities.invokeLater(() -> new Image(data));
     }
 }
