@@ -143,36 +143,22 @@ public class ClientConnection implements Runnable {
                             send("NOTIFY You can't start a dm with yourself or when you are in a dm already");
                         } else {
                             boolean online = false;
-                            ClientConnection c = null;
                             ClientConnection cc = null;
                             for (GroupChat gc : serve.getChats()) {
-                                int index = 0;
                                 for (ClientConnection con : gc.getConnections()) {
                                     if (Objects.equals(userDM, con.user.getUsername())) {
                                         online = true;
-                                        List<ClientConnection> ccs = gc.getConnections();
-                                        cc = ccs.get(index);
+                                        cc = con;
+                                        break;
                                     }
-                                    if (Objects.equals(user.getUsername(), con.user.getUsername())) {
-                                        List<ClientConnection> ccs = gc.getConnections();
-                                        c = ccs.get(index);
-                                    }
-                                    index++;
                                 }
                             }
                             if (!online) {
-                                int index = 0;
                                 for (ClientConnection con : serve.connections) {
                                     if (Objects.equals(userDM, con.user.getUsername())) {
                                         online = true;
-                                        List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
-                                        cc = ccs.get(index);
+                                        cc = con;
                                     }
-                                    if (Objects.equals(user.getUsername(), u)) {
-                                        List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
-                                        c = ccs.get(index);
-                                    }
-                                    index++;
                                 }
                             }
                             if (!online) {
@@ -182,7 +168,7 @@ public class ClientConnection implements Runnable {
                                 send("You have entered a dm, waiting for invited user to accept...");
                                 indm = true;
                                 cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
-                                dmSetUp(user.getUsername(), c, cc);
+                                dmSetUp(user.getUsername(), this, cc);
                             }
                         }
                         break;
