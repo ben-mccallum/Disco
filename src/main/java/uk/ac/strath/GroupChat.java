@@ -6,14 +6,11 @@ import java.util.Objects;
 
 public class GroupChat implements Runnable{
     private List<ClientConnection> gcconnections;
-    private List<String> Members;
     private String ID;
 
-    public GroupChat(ClientConnection cc, String chatname, String user){
+    public GroupChat(ClientConnection cc, String chatname){
         gcconnections = new ArrayList<>();
         gcconnections.add(cc);
-        Members = new ArrayList<>();
-        Members.add(user);
         ID = chatname;
     }
 
@@ -25,17 +22,12 @@ public class GroupChat implements Runnable{
         return ID;
     }
 
-    public List<String> getMembers(){
-        return Members;
-    }
-
     public List<ClientConnection> getConnections(){
         return gcconnections;
     }
 
-    public void addMember(Server s, ClientConnection c, String user) {
-        s.removeConnections(c, user);
-        Members.add(user);
+    public void addMember(Server s, ClientConnection c) {
+        s.removeConnections(c);
         gcconnections.add(c);
     }
 }

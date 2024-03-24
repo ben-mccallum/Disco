@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable {
     protected boolean running;
     protected List<ClientConnection> connections;
-    protected List<String> connectedUsers;
     protected ExecutorService pool;
     protected ServerSocket server;
     protected Database database;
@@ -23,7 +22,6 @@ public class Server implements Runnable {
     public Server() {
         running = true;
         connections = new ArrayList<>();
-        connectedUsers = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
         chatRooms = new ArrayList<>();
         activeDMs = new ArrayList<>();
@@ -75,8 +73,8 @@ public class Server implements Runnable {
             String username = parts[1];
             boolean inchat = false;
             for (GroupChat gc : chatRooms) {
-                for (String user : gc.getMembers()) {
-                    if (Objects.equals(user, username)) {
+                for (ClientConnection con: gc.getConnections()) {
+                    if (Objects.equals(username, con.user.getUsername())) {
                         inchat = true;
                         for (ClientConnection cc : gc.getConnections()) {
                             if (cc != null) {
@@ -92,14 +90,6 @@ public class Server implements Runnable {
                         cc.send(message);
                     }
                 }
-            }
-        }
-    }
-
-    public void broadcast(String message) {
-        for (ClientConnection cc : connections) {
-            if (cc != null) {
-                cc.send(message);
             }
         }
     }
@@ -128,34 +118,30 @@ public class Server implements Runnable {
         return database;
     }
 
-    public boolean isRunning() {
-        return running;
-    }
 
-    public void newChat(ClientConnection c, String chatName, String user){
-        removeConnections(c, user);
-        GroupChat chat = new GroupChat(c, chatName, user);
+    public void newChat(ClientConnection c, String chatName){
+        removeConnections(c);
+        GroupChat chat = new GroupChat(c, chatName);
         chatRooms.add(chat);
     }
 
-    public void leaveChat(ClientConnection c, String user){
+    public void leaveChat(ClientConnection c){
         boolean inchat = false;
         for (GroupChat gc : chatRooms) {
             boolean remove = false;
             gc.getConnections().removeIf(cc -> cc == c);
-            for (String u : gc.getMembers()) {
-                if(Objects.equals(u, user)){
+            for (ClientConnection con: gc.getConnections()) {
+                if(Objects.equals(con, c)){
                     inchat = true;
                     remove = true;
                 }
             }
             if (remove){
-                gc.getMembers().remove(user);
+                gc.getConnections().remove(c);
             }
         }
         if (inchat){
             connections.add(c);
-            connectedUsers.add(user);
         }
     }
 
@@ -167,29 +153,18 @@ public class Server implements Runnable {
         return activeDMs;
     }
 
-    public List<String> getConnected(){
-    return connectedUsers;
-}
-
-    public void addConnectedUser(String User){
-        connectedUsers.add(User);
-    }
-
     public List<ClientConnection> getConnections(){
         return connections;
     }
 
-    public void removeConnections(ClientConnection c, String user){
+    public void removeConnections(ClientConnection c){
         for (GroupChat gc : getChats()) {
             gc.getConnections().removeIf(cc -> cc == c);
-            gc.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         for (DirectMessage dm : getActiveDMs()) {
             dm.getConnections().removeIf(cc -> cc == c);
-            dm.getMembers().removeIf(u -> Objects.equals(u, user));
         }
         connections.removeIf(cc -> cc == c);
-        connectedUsers.removeIf(u -> Objects.equals(u, user));
     }
 
 }
