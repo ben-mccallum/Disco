@@ -16,13 +16,19 @@ public class Server implements Runnable {
     protected ExecutorService pool;
     protected ServerSocket server;
     protected Database database;
+    protected IdleTime idleTime;
+    protected Thread idleTimeThread;
     protected ArrayList<GroupChat> chatRooms;
     protected ArrayList<DirectMessage> activeDMs;
+    private Thread timeThread;
+    protected timeFinder tF;
 
     public Server() {
         running = true;
         connections = new ArrayList<>();
         pool = Executors.newCachedThreadPool();
+        idleTime = new IdleTime(this);
+        idleTimeThread = new Thread(idleTime);
         chatRooms = new ArrayList<>();
         activeDMs = new ArrayList<>();
 
@@ -40,9 +46,10 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        if(running){
+        if (running) {
+            idleTimeThread.start();
             System.out.println("Server started and awaiting connections.");
-        }else{
+        } else {
             stop();
             return;
         }
@@ -63,6 +70,8 @@ public class Server implements Runnable {
 
     public void broadcastMessage(String message) {
         if (chatRooms.isEmpty() && activeDMs.isEmpty()) {
+            timeFinder tF = new timeFinder(message);
+            message = tF.getMsg();
             for (ClientConnection cc : connections) {
                 if (cc != null) {
                     cc.send(message);
@@ -76,6 +85,8 @@ public class Server implements Runnable {
                 for (ClientConnection con: gc.getConnections()) {
                     if (Objects.equals(username, con.user.getUsername())) {
                         inchat = true;
+                        timeFinder tF = new timeFinder(message);
+                        message = tF.getMsg();
                         for (ClientConnection cc : gc.getConnections()) {
                             if (cc != null) {
                                 cc.send(message);
@@ -85,11 +96,21 @@ public class Server implements Runnable {
                 }
             }
             if (!inchat) {
+                timeFinder tF = new timeFinder(message);
+                message = tF.getMsg();
                 for (ClientConnection cc : connections) {
                     if (cc != null) {
                         cc.send(message);
                     }
                 }
+            }
+        }
+    }
+
+    private void broadcast(String message) {
+        for (ClientConnection cc : connections){
+            if (cc != null) {
+                cc.send(message);
             }
         }
     }
@@ -118,6 +139,9 @@ public class Server implements Runnable {
         return database;
     }
 
+    public boolean isRunning() {
+        return running;
+    }
 
     public void newChat(ClientConnection c, String chatName){
         removeConnections(c);
@@ -167,4 +191,7 @@ public class Server implements Runnable {
         connections.removeIf(cc -> cc == c);
     }
 
+    public IdleTime getIdleTime() {
+        return idleTime;
+    }
 }

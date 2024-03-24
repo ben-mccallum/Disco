@@ -14,7 +14,7 @@ public class ClientConnection implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     protected User user;
-    private Server serve;
+    private final Server serve;
     protected boolean indm;
     protected ClientConnection connectedTo;
     protected DirectMessage activeDM;
@@ -71,6 +71,8 @@ public class ClientConnection implements Runnable {
 
                     case "MESSAGE":
                         if (!args.isEmpty()) {
+                            serve.getIdleTime().setLastMessage(user.getUsername(), new Date().getTime());
+
                             if (!indm) {
                                 serve.broadcastMessage("MESSAGE " + user.getUsername() + " " + String.join(" ", args));
                             } else {
@@ -136,7 +138,7 @@ public class ClientConnection implements Runnable {
                         break;
 
                     case "DM":
-                        String userDM = args.get(0);
+                        String userDM = args.getFirst();
                         if (Objects.equals(userDM, user.getUsername()) || indm){
                             send("NOTIFY You can't start a dm with yourself or when you are in a dm already");
                         } else {
@@ -144,7 +146,7 @@ public class ClientConnection implements Runnable {
                             ClientConnection c = null;
                             ClientConnection cc = null;
                             for (GroupChat gc : serve.getChats()) {
-                                Integer index = 0;
+                                int index = 0;
                                 for (ClientConnection con : gc.getConnections()) {
                                     if (Objects.equals(userDM, con.user.getUsername())) {
                                         online = true;
@@ -159,14 +161,14 @@ public class ClientConnection implements Runnable {
                                 }
                             }
                             if (!online) {
-                                Integer index = 0;
+                                int index = 0;
                                 for (ClientConnection con : serve.connections) {
                                     if (Objects.equals(userDM, con.user.getUsername())) {
                                         online = true;
                                         List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
                                         cc = ccs.get(index);
                                     }
-                                    if (Objects.equals(user.getUsername(), con.user.getUsername())) {
+                                    if (Objects.equals(user.getUsername(), u)) {
                                         List<ClientConnection> ccs = App.getInstance().getServer().getConnections();
                                         c = ccs.get(index);
                                     }
@@ -313,7 +315,15 @@ public class ClientConnection implements Runnable {
                             }
                         }
 
-                        send("ONLINE " + String.join(" ", onlineUsers));
+                        List<String> newOnlineUsers = new ArrayList<>();
+
+                        for (String i : onlineUsers) {
+                            newOnlineUsers.add(serve.getIdleTime().isIdle(i) ? ("!" + i) : i);
+                        }
+
+                        send("ONLINE " + String.join(" ", newOnlineUsers));
+
+
 
                     default:
                         break;
@@ -336,6 +346,7 @@ public class ClientConnection implements Runnable {
             if (client.isConnected()) {
                 client.close();
             }
+            serve.removeConnections(this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

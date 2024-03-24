@@ -54,12 +54,20 @@ public class GUI implements Runnable {
         ViewChat vc = (ViewChat) views.get("chat");
 
         vc.getMessages().setText(vc.getMessages().getText() + message + "\n");
+        vc.getScrollPane().getVerticalScrollBar().setValue(vc.getScrollPane().getVerticalScrollBar().getMaximum());
     }
 
     public void setOnlineUsers(String[] users) {
         ViewChat vc = (ViewChat) views.get("chat");
 
         vc.getOnlinePeople().setListData(new Vector<String>(Arrays.asList(users)));
+    }
+
+    public void setCurrentTime(String time) {
+        SwingUtilities.invokeLater(() -> {
+            ViewChat vc = (ViewChat) views.get("chat");
+            vc.getCurrentTime().setText(time);
+        });
     }
 
     public void sendMessage(String message) {

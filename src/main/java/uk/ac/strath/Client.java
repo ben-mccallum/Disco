@@ -1,5 +1,7 @@
 package uk.ac.strath;
 
+import jdk.internal.classfile.impl.ClassPrinterImpl;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,7 +17,9 @@ public class Client implements Runnable {
     private BufferedReader in;
     private GUI gui;
     private PollOnlineUsers pollOnlineUsers;
-    private Thread guiThread, pollOnlineThread;
+
+    private CurrentTime currentTime;
+    private Thread guiThread, pollOnlineThread, currentTimeThread;
 
     public Client(String ip) {
         running = true;
@@ -23,6 +27,8 @@ public class Client implements Runnable {
         guiThread = new Thread(gui);
         pollOnlineUsers = new PollOnlineUsers(this);
         pollOnlineThread = new Thread(pollOnlineUsers);
+        currentTime = new CurrentTime(gui);
+        currentTimeThread = new Thread(currentTime);
 
         try {
             client = new Socket(ip, App.PORT);
@@ -37,6 +43,7 @@ public class Client implements Runnable {
     public void run() {
         guiThread.start();
         pollOnlineThread.start();
+        currentTimeThread.start();
 
         String message;
 
@@ -63,8 +70,14 @@ public class Client implements Runnable {
                         break;
 
                     case "ONLINE":
-                        gui.setOnlineUsers(args.toArray(new String[args.size()]));
+                        gui.setOnlineUsers(args.toArray(new String[0]));
                         break;
+
+
+                    case "TIME":
+                        gui.setCurrentTime(String.join(" ", args));
+                        break;
+
 
                     default:
                         break;

@@ -20,18 +20,18 @@ public class DirectMessage implements Runnable {
 
     public void acceptRequest(Server s) {
         s.removeConnections(waitingC);
-        dmconnections.get(0).connectedTo = waitingC;
-        waitingC.connectedTo = dmconnections.get(0);
+        dmconnections.getFirst().connectedTo = waitingC;
+        waitingC.connectedTo = dmconnections.getFirst();
         dmconnections.add(waitingC);
-        dmconnections.get(0).send("NOTIFY " + waitingC.user.getUsername() + " has joined your dm, say hi!");
-        waitingC.send("NOTIFY you have joined a dm with " + dmconnections.get(0).user.getUsername());
+        dmconnections.getFirst().send("NOTIFY " + waitingC.user.getUsername() + " has joined your dm, say hi!");
+        waitingC.send("NOTIFY you have joined a dm with " + dmconnections.getFirst().user.getUsername());
         waitingC = null;
     }
 
     public void rejectRequest(Server s) {
-        dmconnections.get(0).send("NOTIFY " + waitingC.user.getUsername() + " rejected your request, you have rejoined the main message board");
-        dmconnections.get(0).indm = false;
-        s.connections.add(dmconnections.get(0));
+        dmconnections.getFirst().send("NOTIFY " + waitingC.user.getUsername() + " rejected your request, you have rejoined the main message board");
+        dmconnections.getFirst().indm = false;
+        s.connections.add(dmconnections.getFirst());
     }
 
     public List<ClientConnection> getConnections() {
