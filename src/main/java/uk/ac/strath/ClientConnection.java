@@ -295,11 +295,28 @@ public class ClientConnection implements Runnable {
                                     FileInputStream fileInputStream = new FileInputStream(selectedFile.getAbsolutePath());
 
                                     String fileName = selectedFile.getName();
+                                    String fileType = fileName.substring(Math.max(fileName.length() - 3, 0));
 
                                     byte[] fileContentBytes = new byte[(int) selectedFile.length()];
                                     fileInputStream.read(fileContentBytes);
 
-                                    connectedTo.displayVideo(fileContentBytes);
+                                    if (fileType.equals("mp4")) {
+                                        send("NOTIFY Video sent");
+                                        connectedTo.send("NOTIFY You have been sent a video! It is now playing");
+                                        connectedTo.displayVideo(fileContentBytes);
+                                    } else {
+                                        if (fileType.equals("png")) {
+                                            send("NOTIFY Image sent");
+                                            connectedTo.send("NOTIFY You have been sent a image! It is now displaying");
+                                            connectedTo.displayImage(fileContentBytes);
+                                        } else {
+                                            send("NOTIFY File sent");
+                                            connectedTo.send("NOTIFY You have been sent a file! It is in your downloads folder");
+                                            connectedTo.fileDownload(fileContentBytes, fileName);
+                                        }
+                                    }
+
+
 
 
                                 } else {

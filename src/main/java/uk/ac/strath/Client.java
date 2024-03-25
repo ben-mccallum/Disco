@@ -1,5 +1,6 @@
 package uk.ac.strath;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -101,4 +102,6 @@ public class Client implements Runnable {
     public boolean isRunning() {
         return running;
     }
+
+
 }
