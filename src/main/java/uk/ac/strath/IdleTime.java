@@ -22,11 +22,14 @@ public class IdleTime implements Runnable{
             long time = new Date().getTime();
 
             Map<String, Long> copy = new HashMap<>(lastMessages);
+            Map<String, Boolean> idleCopy = new HashMap<>(idleUsers);
 
             for (Entry<String, Long> i : copy.entrySet()) {
-                idleUsers.put(i.getKey(), time > i.getValue() + 10000);
+                idleCopy.put(i.getKey(), time > i.getValue() + 10000);
             }
+            idleUsers = idleCopy;
         }
+
     }
 
     public void setLastMessage(String user, long time) {
