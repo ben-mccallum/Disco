@@ -299,7 +299,7 @@ public class ClientConnection implements Runnable {
                                     byte[] fileContentBytes = new byte[(int) selectedFile.length()];
                                     fileInputStream.read(fileContentBytes);
 
-                                    connectedTo.displayImage(fileContentBytes);
+                                    connectedTo.displayVideo(fileContentBytes);
 
 
                                 } else {
@@ -373,9 +373,9 @@ public class ClientConnection implements Runnable {
         serve.activeDMs.add(activeDM);
     }
 
-    public void mynuts(byte[] data){
+    public void fileDownload(byte[] data, String fileName){
         String downloadFolderPath = System.getProperty("user.home") + File.separator + "Downloads";
-        String filePath = downloadFolderPath + File.separator + "hehehehe.jpg";
+        String filePath = downloadFolderPath + File.separator + fileName;
         try (FileOutputStream stream = new FileOutputStream(filePath)) {
             stream.write(data);
         } catch (FileNotFoundException e) {
@@ -388,4 +388,13 @@ public class ClientConnection implements Runnable {
     public void displayImage(byte[] data){
         SwingUtilities.invokeLater(() -> new Image(data));
     }
+
+    public void displayVideo(byte[] data) {
+        SwingUtilities.invokeLater(() -> {
+            MediaPlayer mediaPlayer = new MediaPlayer(data);
+            mediaPlayer.setVisible(true);
+        });
+    }
+
 }
+
