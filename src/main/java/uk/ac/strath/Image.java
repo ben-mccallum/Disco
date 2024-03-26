@@ -11,6 +11,7 @@ public class Image extends JFrame {
     public Image(byte[] imageData) {
         try {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageData));
+            System.out.println("test");
 
             JLabel label = new JLabel(new ImageIcon(img));
 

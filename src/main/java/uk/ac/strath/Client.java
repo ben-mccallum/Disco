@@ -1,13 +1,11 @@
 package uk.ac.strath;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.*;
 
 public class Client implements Runnable {
     private boolean running;
@@ -67,6 +65,22 @@ public class Client implements Runnable {
                         gui.setOnlineUsers(args.toArray(new String[args.size()]));
                         break;
 
+                    case "FILE":
+                        byte[] decodedFileBytes = Base64.getDecoder().decode(args.getFirst());
+                        String name = args.getLast();
+                        fileDownload(decodedFileBytes, name);
+                        break;
+
+                    case "IMAGE":
+                        byte[] decodedImageBytes = Base64.getDecoder().decode(args.getFirst());
+                        displayImage(decodedImageBytes);
+                        break;
+
+                    case "VIDEO":
+                        byte[] decodedVideoBytes = Base64.getDecoder().decode(args.getFirst());
+                        displayVideo(decodedVideoBytes);
+                        break;
+
                     default:
                         break;
                 }
@@ -102,6 +116,30 @@ public class Client implements Runnable {
     public boolean isRunning() {
         return running;
     }
+
+    public void displayImage(byte[] data){
+        SwingUtilities.invokeLater(() -> new Image(data));
+    }
+
+    public void fileDownload(byte[] data, String fileName){
+        String downloadFolderPath = System.getProperty("user.home") + File.separator + "Downloads";
+        String filePath = downloadFolderPath + File.separator + fileName;
+        try (FileOutputStream stream = new FileOutputStream(filePath)) {
+            stream.write(data);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void displayVideo(byte[] data) {
+        SwingUtilities.invokeLater(() -> {
+            MediaPlayer mediaPlayer = new MediaPlayer(data);
+            mediaPlayer.setVisible(true);
+        });
+    }
+
 
 
 }

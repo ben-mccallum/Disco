@@ -24,7 +24,6 @@ public class ClientConnection implements Runnable {
     protected boolean indm;
     protected ClientConnection connectedTo;
     protected DirectMessage activeDM;
-    private static final int FILE_TRANSFER_PORT = 12345;
 
     public ClientConnection(Socket client, Server s) {
         this.client = client;
@@ -299,25 +298,23 @@ public class ClientConnection implements Runnable {
 
                                     byte[] fileContentBytes = new byte[(int) selectedFile.length()];
                                     fileInputStream.read(fileContentBytes);
+                                    String base64String = Base64.getEncoder().encodeToString(fileContentBytes);
 
                                     if (fileType.equals("mp4")) {
                                         send("NOTIFY Video sent");
+                                        connectedTo.send("VIDEO " + base64String);
                                         connectedTo.send("NOTIFY You have been sent a video! It is now playing");
-                                        connectedTo.displayVideo(fileContentBytes);
                                     } else {
                                         if (fileType.equals("png")) {
                                             send("NOTIFY Image sent");
+                                            connectedTo.send("IMAGE " + base64String);
                                             connectedTo.send("NOTIFY You have been sent a image! It is now displaying");
-                                            connectedTo.displayImage(fileContentBytes);
                                         } else {
                                             send("NOTIFY File sent");
                                             connectedTo.send("NOTIFY You have been sent a file! It is in your downloads folder");
-                                            connectedTo.fileDownload(fileContentBytes, fileName);
+                                            connectedTo.send("FILE " + base64String + " " + fileName);
                                         }
                                     }
-
-
-
 
                                 } else {
                                     send("NOTIFY No file selected.");
@@ -388,29 +385,6 @@ public class ClientConnection implements Runnable {
         serve.removeConnections(c, user);
         activeDM = new DirectMessage(user, userWaiting, c, cc);
         serve.activeDMs.add(activeDM);
-    }
-
-    public void fileDownload(byte[] data, String fileName){
-        String downloadFolderPath = System.getProperty("user.home") + File.separator + "Downloads";
-        String filePath = downloadFolderPath + File.separator + fileName;
-        try (FileOutputStream stream = new FileOutputStream(filePath)) {
-            stream.write(data);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void displayImage(byte[] data){
-        SwingUtilities.invokeLater(() -> new Image(data));
-    }
-
-    public void displayVideo(byte[] data) {
-        SwingUtilities.invokeLater(() -> {
-            MediaPlayer mediaPlayer = new MediaPlayer(data);
-            mediaPlayer.setVisible(true);
-        });
     }
 
 }
