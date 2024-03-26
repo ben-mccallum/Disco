@@ -7,6 +7,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.*;
+import javax.swing.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.*;
+
 
 
 public class ClientConnection implements Runnable {
@@ -165,7 +171,7 @@ public class ClientConnection implements Runnable {
                                 send("NOTIFY That user is not online!");
                                 break;
                             } else {
-                                send("You have entered a dm, waiting for invited user to accept...");
+                                send("NOTIFY You have entered a dm, waiting for invited user to accept...");
                                 indm = true;
                                 cc.send("NOTIFY " + user.getUsername() + " wants to start a dm with you, /yes to accept, /no to decline");
                                 dmSetUp(user.getUsername(), this, cc);
@@ -267,6 +273,53 @@ public class ClientConnection implements Runnable {
 
                         break;
 
+                    case "FILE":
+                        if (indm) {
+                            send("NOTIFY Initiating file transfer...");
+                            try {
+                                JFileChooser fileChooser = new JFileChooser();
+                                int returnValue = fileChooser.showOpenDialog(null);
+
+                                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                                    File selectedFile = fileChooser.getSelectedFile();
+                                    send("NOTIFY Selected file: " + selectedFile.getAbsolutePath());
+
+                                    FileInputStream fileInputStream = new FileInputStream(selectedFile.getAbsolutePath());
+
+                                    String fileName = selectedFile.getName();
+                                    String fileType = fileName.substring(Math.max(fileName.length() - 3, 0));
+
+                                    byte[] fileContentBytes = new byte[(int) selectedFile.length()];
+                                    fileInputStream.read(fileContentBytes);
+                                    String base64String = Base64.getEncoder().encodeToString(fileContentBytes);
+
+                                    if (fileType.equals("mp4")) {
+                                        send("NOTIFY Video sent");
+                                        connectedTo.send("VIDEO " + base64String);
+                                        connectedTo.send("NOTIFY You have been sent a video! It is now playing");
+                                    } else {
+                                        if (fileType.equals("png")) {
+                                            send("NOTIFY Image sent");
+                                            connectedTo.send("IMAGE " + base64String);
+                                            connectedTo.send("NOTIFY You have been sent a image! It is now displaying");
+                                        } else {
+                                            send("NOTIFY File sent");
+                                            connectedTo.send("NOTIFY You have been sent a file! It is in your downloads folder");
+                                            connectedTo.send("FILE " + base64String + " " + fileName);
+                                        }
+                                    }
+
+                                } else {
+                                    send("NOTIFY No file selected.");
+                                }
+                            } catch (IOException e) {
+                                send("NOTIFY Error occurred during file transfer: " + e.getMessage());
+                            }
+                        } else {
+                            send("NOTIFY You must be in a DM to send a file.");
+                        }
+                        break;
+
                     case "ONLINE":
                         if (user == null || serve.connections == null) {
                             break;
@@ -343,4 +396,6 @@ public class ClientConnection implements Runnable {
         activeDM = new DirectMessage(user, c, cc);
         serve.activeDMs.add(activeDM);
     }
+
 }
+
