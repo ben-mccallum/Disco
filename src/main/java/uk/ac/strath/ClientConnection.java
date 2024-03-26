@@ -182,7 +182,7 @@ public class ClientConnection implements Runnable {
                     case "YES":
                         boolean waiting = false;
                         for (DirectMessage dm : serve.getActiveDMs()) {
-                            if (Objects.equals(user.getUsername(), dm.waitingC)) {
+                            if (Objects.equals(user.getUsername(), dm.waitingC.user.getUsername())) {
                                 waiting = true;
                                 indm = true;
                                 activeDM = dm;
@@ -198,7 +198,7 @@ public class ClientConnection implements Runnable {
                         boolean wait = false;
                         DirectMessage target = null;
                         for (DirectMessage dm : serve.getActiveDMs()) {
-                            if (Objects.equals(user.getUsername(), dm.waitingC)) {
+                            if (Objects.equals(user.getUsername(), dm.waitingC.user.getUsername())) {
                                 wait = true;
                                 target = dm;
                             }
