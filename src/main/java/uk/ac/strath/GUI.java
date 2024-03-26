@@ -117,6 +117,15 @@ public class GUI implements Runnable {
                 client.send("FILE ");
                 break;
 
+            case "/timetravel":
+                client.send("TARDIS ");
+                break;
+
+            case "/ustimetravel":
+                client.send("BADTARDIS ");
+                break;
+
+
             case "/help":
                 if(args.size() > 1){
                     //help lists for specific commands???

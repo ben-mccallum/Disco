@@ -273,6 +273,46 @@ public class ClientConnection implements Runnable {
 
                         break;
 
+                    case "TARDIS":
+                        SafeCounter safeCounter = new SafeCounter();
+                        Runnable safeTask = () -> {
+                            for (int i = 0; i < 1012; i++) {
+                                safeCounter.increment();
+                            }
+                        };
+                        Thread thread1 = new Thread(safeTask);
+                        Thread thread2 = new Thread(safeTask);
+                        thread1.start();
+                        thread2.start();
+                        try {
+                            thread1.join();
+                            thread2.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        send("NOTIFY You've returned to: " + safeCounter.getCount());
+                        break;
+
+                    case "BADTARDIS":
+                        UnsafeCounter unsafeCounter = new UnsafeCounter();
+                        Runnable unsafeTask = () -> {
+                            for (int i = 0; i < 1012; i++) {
+                                unsafeCounter.increment();
+                            }
+                        };
+                        Thread thread3 = new Thread(unsafeTask);
+                        Thread thread4 = new Thread(unsafeTask);
+                        thread3.start();
+                        thread4.start();
+                        try {
+                            thread3.join();
+                            thread4.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        send("NOTIFY Tardis malfunction! You're in: " + unsafeCounter.getCount());
+                        break;
+
                     case "FILE":
                         if (indm) {
                             send("NOTIFY Initiating file transfer...");
