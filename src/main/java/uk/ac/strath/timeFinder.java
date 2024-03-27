@@ -22,8 +22,12 @@ public class timeFinder implements Runnable{
 
     public String getMsg(){
         //Remove while loop to demo unsafe thread
-        while(runner.isAlive()){
-            continue;
+        if(runner.isAlive()){
+            try {
+                wait(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         return content;
     }
