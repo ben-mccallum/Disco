@@ -136,6 +136,11 @@ public class GUI implements Runnable {
                 showMessage("To login, type '/login' followed by your username and password");
                 showMessage("Once you're logged in, you can send messages here, or use '/chat' to enter a specific chatroom");
                 showMessage("To create a new account, type '/signup' followed by your username and password");
+                showMessage("To join a group chat use '/chat' and then specify the name of the chat you wish to join");
+                showMessage("To direct message someone use '/dm' followed by that users name");
+                showMessage("If you wish to send a file inside a direct message use '/file', videos and images will be displayed to the user, other files will be downloaded");
+                showMessage("If you wish to...time travel use /timetravel to travel safely and /ustimetravel to travel unsafely");
+                showMessage("To leave a chat or dm, use '/leave', you will be returned to the main chat");
                 showMessage("To logout, type '/logout'");
                 showMessage("To see this message again, type '/help'");
                 showMessage("---------------------------------------------------");
@@ -155,7 +160,7 @@ public class GUI implements Runnable {
                 break;
 
             case "/leave":
-                client.send("LEAVE");
+                client.send("LEAVE ");
                 clearChat();
                 break;
 

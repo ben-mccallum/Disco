@@ -327,7 +327,7 @@ public class ClientConnection implements Runnable {
                                     FileInputStream fileInputStream = new FileInputStream(selectedFile.getAbsolutePath());
 
                                     String fileName = selectedFile.getName();
-                                    String fileType = fileName.substring(Math.max(fileName.length() - 3, 0));
+                                    String fileType = fileName.substring(Math.max(fileName.length() - 3, 0)).toLowerCase();
 
                                     byte[] fileContentBytes = new byte[(int) selectedFile.length()];
                                     fileInputStream.read(fileContentBytes);

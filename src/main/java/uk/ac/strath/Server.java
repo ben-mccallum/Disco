@@ -153,9 +153,8 @@ public class Server implements Runnable {
         boolean inchat = false;
         for (GroupChat gc : chatRooms) {
             boolean remove = false;
-            gc.getConnections().removeIf(cc -> cc == c);
             for (ClientConnection con: gc.getConnections()) {
-                if(Objects.equals(con, c)){
+                if (Objects.equals(con, c)) {
                     inchat = true;
                     remove = true;
                 }
